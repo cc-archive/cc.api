@@ -1,4 +1,4 @@
-## Copyright (c) 2007 Nathan R. Yergler, Creative Commons
+## Copyright (c) 2010, John Doig, Creative Commons
 
 ## Permission is hereby granted, free of charge, to any person obtaining
 ## a copy of this software and associated documentation files (the "Software"),
@@ -24,20 +24,21 @@ from setuptools import setup, find_packages
 setup(
     name = "cc.api",
     version = "0.1",
-    packages = find_packages('.'),
-
+    packages = find_packages('cc'),
+    package_dir = {'': 'cc'},
+    
     # scripts and dependencies
     install_requires = [
         'lxml',
         'web.py',
-        ]
+        ],
 
     entry_points = { },
 
     # author metadata
     author = 'John E Doig III',
     author_email = 'john@creativecommons.org',
-    description = 'Creative Commons web service REST API.',
+    description = 'Creative Commons REST API web service.',
     license = 'MIT',
     url = 'http://api.creativecommons.org',
 
