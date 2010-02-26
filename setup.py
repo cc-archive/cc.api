@@ -18,19 +18,21 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import sys
 from setuptools import setup, find_packages
 
 setup(
     name = "cc.api",
     version = "0.1",
+    url = 'http://api.creativecommons.org',
+    
     packages = find_packages('cc'),
-    package_dir = {'': 'cc'},
+    package_dir = {'':'cc'},
     
     # scripts and dependencies
     install_requires = [
         'lxml',
         'web.py',
+        'cc.license',
         ],
 
     entry_points = { },
@@ -40,6 +42,5 @@ setup(
     author_email = 'john@creativecommons.org',
     description = 'Creative Commons REST API web service.',
     license = 'MIT',
-    url = 'http://api.creativecommons.org',
 
     )
