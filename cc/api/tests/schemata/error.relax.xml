@@ -1,0 +1,18 @@
+<element name="error" xmlns="http://relaxng.org/ns/structure/1.0">
+  <element name="id">
+    <text/>
+  </element>
+
+  <element name="message">
+    <text/>
+  </element>
+  <optional>
+    <element name="traceback">
+      <text/>
+    </element>
+    <element name="exception">
+      <attribute name="type" />
+      <text/>
+    </element>
+  </optional>
+</element>

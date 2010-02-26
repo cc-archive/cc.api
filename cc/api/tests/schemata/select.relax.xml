@@ -1,0 +1,21 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+  <start>
+    <element name="select">
+      <group>
+        <attribute name="name">
+          <text/>
+        </attribute>
+      </group>
+      <oneOrMore>
+        <element name="option">
+          <group> 
+            <attribute name="value">
+              <text/> 
+            </attribute>
+          </group>
+          <text/>
+        </element>
+      </oneOrMore>
+    </element>
+  </start>
+</grammar>

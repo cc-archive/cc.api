@@ -1,0 +1,8 @@
+<element name="locales" xmlns="http://relaxng.org/ns/structure/1.0">
+  <oneOrMore>
+    <element name="locale">
+      <attribute name="id" />
+      <text />
+    </element>
+  </oneOrMore>
+</element>

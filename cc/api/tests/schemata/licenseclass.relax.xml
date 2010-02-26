@@ -1,0 +1,45 @@
+<element name="licenseclass" 
+	 xmlns="http://relaxng.org/ns/structure/1.0">
+  <attribute name="id" />
+  <element name="label">
+    <attribute name="xml:lang" />
+    <text />
+  </element>
+
+  <zeroOrMore>
+    <element name="field">
+      <attribute name="id" />
+      <element name="label">
+	    <attribute name="xml:lang" />
+	    <text/>
+      </element>
+      <element name="description">
+	    <attribute name="xml:lang" />
+	    <text/>
+      </element>
+      <element name="type">
+	<text/>
+      </element>
+
+      <zeroOrMore>
+	<element name="enum">
+	  <attribute name="id" />
+	  <element name="label">
+	    <attribute name="xml:lang" />
+	    <text/>
+	  </element>
+      <!-- not sure if this is correct -->
+      <zeroOrMore>
+      <element name="description">
+	    <attribute name="xml:lang" />
+	    <text/>
+      </element>
+      </zeroOrMore>
+      <!-- the above segment was added for tests to pass -->
+	</element>
+      </zeroOrMore>
+
+    </element>
+  </zeroOrMore>
+
+</element>

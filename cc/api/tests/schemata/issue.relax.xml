@@ -1,0 +1,229 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+  <start>
+    <element name="result">
+      <group>
+        <element name="license-uri">
+          <text/>
+        </element>
+        <element name="license-name">
+          <text/>
+        </element>
+        <element name="rdf">
+          <ref name="d1_RDF"/>
+        </element>
+        <element name="licenserdf">
+          <ref name="d1_RDF"/>
+        </element>
+        <element name="html">
+            <choice> 
+              <ref name="standard" />
+              <ref name="zero" />
+            </choice>
+        </element>
+      </group>
+    </element>
+  </start>
+              
+            <define name="badge_html" combine="interleave">
+              <oneOrMore>
+                <element name="a">
+                  <group>
+                    <group>
+                      <attribute name="rel">
+                        <text/>
+                      </attribute>
+                      <attribute name="href">
+                        <text/>
+                      </attribute>
+                      <optional>
+                        <attribute name="style">
+                          <text />
+                        </attribute>
+                      </optional>
+                    </group>
+                    <interleave>
+                      <optional>
+                        <element name="img">
+                          <group>
+                            <choice>
+                              <attribute name="style">
+                                <text/>
+                              </attribute>
+                              <attribute name="border">
+                                <text/>
+                              </attribute>
+                            </choice>
+                            <attribute name="alt">
+                              <text/>
+                            </attribute>
+                            <attribute name="src">
+                              <text/>
+                            </attribute>
+                          </group>
+                        </element>
+                      </optional>
+                      <text/>
+                    </interleave>
+                  </group>
+                </element>
+              </oneOrMore>
+            </define>
+            
+            <define name="standard">
+              <interleave>
+                
+                <ref name="badge_html" />
+
+                <element name="br">
+                  <empty/>
+                </element>
+
+                <optional>
+                  <element name="span">
+                    <group>
+                      <attribute name="href">
+                        <text/>
+                      </attribute>
+                      <attribute name="rel">
+                        <text/>
+                      </attribute>
+                    </group>
+                    <text/>
+                  </element>
+                </optional>
+
+                <text />
+
+              </interleave>
+            </define>
+
+            <define name="zero">
+              <element name="p">
+                  
+                <ref name="badge_html" />
+
+                <element name="br">
+                  <empty/>
+                </element>
+
+                <text />
+                
+                <element name="span">
+                  <attribute name="rel">
+                    <text />
+                  </attribute>
+                  <attribute name="resource">
+                    <text />
+                  </attribute>
+                  <text />
+                </element>
+
+                <text />
+                  
+              </element>
+            </define>
+
+
+
+
+  <define name="d1_RDF">
+    <element ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="RDF">
+      <group>
+        <optional>
+          <element ns="http://creativecommons.org/ns#" name="Work">
+            <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="about">
+              <text/>
+            </attribute>
+            <interleave>
+              <element name="license">
+                <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                  <text/>
+                </attribute>
+              </element>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="title">
+		      <text/>
+		  </element>
+	      </optional>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="date">
+		      <text/>
+		  </element>
+	      </optional>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="description">
+		      <text/>
+		  </element>
+	      </optional>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="type">
+                      <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                        <text/>
+                      </attribute>
+		  </element>
+	      </optional>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="source">
+                      <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                        <text/>
+                      </attribute>
+		  </element>
+	      </optional>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="creator">
+                      <element name="Agent">
+                        <text/>
+                      </element>
+		  </element>
+	      </optional>
+	      <optional>
+	          <element ns="http://purl.org/dc/elements/1.1/" name="rights">
+                      <element name="Agent">
+                        <text/>
+                      </element>
+		  </element>
+	      </optional>
+            </interleave>
+          </element>
+        </optional>
+        <element ns="http://creativecommons.org/ns#" name="License">
+          <group>
+            <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="about">
+              <text/>
+            </attribute>
+            <interleave>
+              <zeroOrMore>
+                <element name="requires">
+                  <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                    <text/>
+                  </attribute>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="prohibits">
+                  <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                    <text/>
+                  </attribute>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element name="permits">
+                  <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                    <text/>
+                  </attribute>
+                </element>
+              </zeroOrMore>
+              <zeroOrMore>
+                <element ns="http://www.w3.org/2000/01/rdf-schema#" name="subClassOf">
+                  <attribute ns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" name="resource">
+                    <text/>
+                  </attribute>
+                </element>
+              </zeroOrMore>
+            </interleave>
+          </group>
+        </element>
+      </group>
+    </element>
+  </define>
+</grammar>
