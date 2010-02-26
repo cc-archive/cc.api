@@ -18,20 +18,23 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import cc.license
+import lxml.etree
 import web
 
-class index:
-    def GET(self):
-        """ Returns a list of available license for a given locale. """
-        locale = web.input().get('locale', 'en')
-        classes = cc.license.selectors.SELECTORS    
-        return {
-            'licenses': {
-                'license': [
-                    { 'attributes' : {'id': selector },
-                      'text' : lclass.title(locale),
-                      }
-                    for selector, lclass in classes.iteritems() ]
-                }
-            }
+def processor(handler):
+    results = handler()
+    if web.input().get('format', False):
+        # use the emitter
+        return results
+    else:
+        # use xml emitter
+        return XMLEmitter().format(results)
+    
+class XMLEmitter:
+    
+    def dict_to_etree(self, d):
+        return d
+    
+    def format(self, results_dict):
+        return self.dict_to_etree(results_dict)
+        

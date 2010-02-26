@@ -19,18 +19,26 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import web
-import resources
-
-# App wide settings
 web.config.debug = True
 
-urls = (
-    ('/',        resources.base),
-    ('/simple',  resources.simple),
-    ('/license', resources.license),
-    ('/details', resources.details),
-    ('/support', resources.support),)
+from emitter import processor
 
-application = web.application(urls,
-                              locals(),
-                              (web.config.debug and web.reloader or None)
+urls = (
+    
+    '/',        'resources.base.index',
+    '/locales', 'resources.locales.index',
+    '/details', 'resources.details.index',
+    
+    '/license/(\w+)', 'resources.license.index',
+    '/license/(\w+)/(issue|get)', 'resources.license.issue',
+    
+    '/simple/chooser',  'resources.simple.chooser',
+    '/support/jurisdictions', 'resources.support.jurisdictions',
+
+    ) 
+    
+app = web.application(urls, globals(),)
+app.add_processor(processor)
+
+if __name__ == "__main__":
+    app.run()

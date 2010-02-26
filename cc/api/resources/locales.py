@@ -19,19 +19,10 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import cc.license
-import web
 
 class index:
     def GET(self):
-        """ Returns a list of available license for a given locale. """
-        locale = web.input().get('locale', 'en')
-        classes = cc.license.selectors.SELECTORS    
-        return {
-            'licenses': {
-                'license': [
-                    { 'attributes' : {'id': selector },
-                      'text' : lclass.title(locale),
-                      }
-                    for selector, lclass in classes.iteritems() ]
-                }
-            }
+        """ Return a list of the currently supported locales """
+        locales = cc.license.locales()
+        return {'locales': { 'locale': [
+                {'attributes': { 'id': l } } for l in locales ]}}
