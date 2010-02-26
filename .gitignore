@@ -7,4 +7,4 @@ dist
 downloads
 eggs
 parts
-cc/*.egg-info
+*.egg-info
