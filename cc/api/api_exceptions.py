@@ -18,27 +18,6 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import web
-web.config.debug = True
-
-from emitter import processor
-
-urls = ( # tuple of url to resource method mappings
-    
-    '/',        'resources.base.index',
-    '/locales', 'resources.locales.index',
-    '/details', 'resources.details.index',
-    
-    '/license/([a-z]+)', 'resources.license.index',
-    '/license/([a-z]+)/(issue|get)', 'resources.license.issue',
-    
-    '/simple/chooser',  'resources.simple.chooser',
-    '/support/jurisdictions', 'resources.support.jurisdictions',
-
-    ) 
-    
-app = web.application(urls, globals(),)
-app.add_processor(processor)
-
-if __name__ == "__main__":
-    app.run()
+def invalidclass():
+    return {'error':{'id':{'@text':'invalidclass'},
+                     'message':{'@text':'Invalid License Class.'}}}
