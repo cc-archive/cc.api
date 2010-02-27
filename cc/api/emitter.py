@@ -20,6 +20,7 @@
 
 import lxml.etree as ET
 import web
+import re
 
 def processor(handler):
     results = handler()
@@ -29,33 +30,54 @@ def processor(handler):
         pass
     
     return XMLEmitter().format(results)
-    
+
+XML_NS = 'http://www.w3.org/XML/1998/namespace'
 class XMLEmitter:
 
-    def build_tree(self, parent, children):
-        for child in children:
-            if type(children[child]) == list:
-                for obj in children[child]:
+    def build_element(self, node, attrib=None, text=None):
+        # need to expand prefixes
+
+        if type(attrib) == dict and attrib.get('lang'):
+            attrib['{%s}lang' % XML_NS] = attrib['lang']
+            del attrib['lang']
+            
+        ele = ET.Element(node, attrib)
+        ele.text = text
+        return ele
+    
+    def build_tree(self, parent, children, attrib_key, text_key):
+        
+        for c in filter(lambda e: e not in (attrib_key, text_key), children):
+            if type(children[c]) == list:
+                for obj in children[c]:
                     if type(obj) == list:
-                        ele = ET.Element(child)
-                        self.build_tree(ele, obj)
+                        ele = self.build_element(c)
+                        self.build_tree(ele, obj, attrib_key, text_key)
                     elif type(obj == dict):
-                        ele = ET.Element(child, obj.get('attributes',None))
-                        ele.text = obj.get('text',None)
+                        ele = self.build_element(c,
+                                                 obj.get(attrib_key),
+                                                 obj.get(text_key))
+                        if filter(lambda e: e not in (attrib_key,text_key),obj):
+                            self.build_tree(ele, obj, attrib_key, text_key)
                     parent.append(ele)
             else:
-                ele = ET.Element(child)
-                if type(children[child]) == dict:
-                    ele.attrib = children[child].get('attributes', None)
-                    ele.text = children[child].get('text', None)
-                parent.append(child)        
+                if type(children[c]) == dict:
+                    ele = self.build_element(c,
+                                             children[c].get(attrib_key),
+                                             children[c].get(text_key))
+                    if filter(lambda e: e not in (attrib_key, text_key),
+                              children[c]):
+                        self.build_tree(ele, children[c], attrib_key, text_key)
+                else:
+                    ele = self.build_element(c)
+                parent.append(ele)        
         return parent
 
-    def dict_to_etree(self, d):
-        top = list(d)[0]
-        root = ET.Element(top, d[top].get('attributes', None))
-        root.text = d[top].get('text', None)
-        return self.build_tree(root, d[top])
+    def dict_to_etree(self, d, attrib_key='@attributes', text_key='@text'):
+        top = list(d)[0] 
+        root = ET.Element(top, d[top].get(attrib_key, None))
+        root.text = d[top].get(text_key, None)
+        return self.build_tree(root, d[top], attrib_key, text_key)
     
     def format(self, results_dict):
         return ET.tostring(self.dict_to_etree(results_dict))

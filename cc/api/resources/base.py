@@ -29,9 +29,10 @@ class index:
         return {
             'licenses': {
                 'license': [
-                    { 'attributes' : {'id': selector },
-                      'text' : lclass.title(locale),
-                      }
+                    {
+                        '@attributes' : {'id': selector },
+                        '@text' : lclass.title(locale),
+                    }
                     for selector, lclass in classes.iteritems() ]
                 }
             }

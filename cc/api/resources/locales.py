@@ -25,4 +25,4 @@ class index:
         """ Return a list of the currently supported locales """
         locales = cc.license.locales()
         return {'locales': { 'locale': [
-                {'attributes': { 'id': l } } for l in locales ]}}
+                {'@attributes': { 'id': l } } for l in locales ]}}
