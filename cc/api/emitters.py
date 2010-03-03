@@ -21,7 +21,9 @@
 import lxml.etree as ET
 import re
 import json
+import web.webapi
 import mimerender
+from decorator import decorator
 
 class Emitter(object):
     def format(self, **results):
@@ -113,6 +115,7 @@ def contenttypes(*types):
     
     TODO finish documenting here, expecially to explain mimerender
     """
+
     emitters = {}
     for t in types:
        if t in formatters.keys():
@@ -122,11 +125,23 @@ def contenttypes(*types):
 
     # default to the first type passed to decorator 
     default = types[0] in formatters.keys() and types[0] or 'text'
+    
+    # mimerender will however throw an exception for invalid formats,
+    # to catch these exceptions the mimerender's decorator is wrapped
+    # TODO this needs better explanation
+    def wrapper(f, *args, **kwargs):
+        """
+        mimerender will handle the content negotation based on the headers
+        and the query string parameters. emitters is now a mapping of
+        media-type short names to a method that can emit the resources'
+        returned dicts as xml, json, etc as HTTP responses.
+        """
+        try:    
+            return mimerender.mimerender(default,
+                                         override_input_key='format',
+                                         **emitters)(f)(*args, **kwargs)
+        except (mimerender.MimeRenderException, ValueError):
+            web.webapi.badrequest()
 
-    # mimerender will handle the content negotation based on the headers and
-    # the query string parameters. emitters is now a mapping of media-type
-    # short names to a method that can emit the resources' returned dicts
-    # as xml, json, etc as HTTP responses.
-    return mimerender.mimerender(default,
-                                 override_input_key='format',
-                                 **emitters)
+    return decorator(wrapper)
+

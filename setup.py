@@ -31,7 +31,8 @@ setup(
     # scripts and dependencies
     install_requires = [
         'mimerender',
-	'lxml',
+        'decorator',
+        'lxml',
         'web.py',
         'cc.license',
         ],
