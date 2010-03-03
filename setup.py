@@ -30,7 +30,9 @@ setup(
     
     # scripts and dependencies
     install_requires = [
-        'lxml',
+        'decorator',
+        'mimerender',
+	'lxml',
         'web.py',
         'cc.license',
         ],
