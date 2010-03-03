@@ -22,7 +22,6 @@ import lxml.etree as ET
 import re
 import json
 import mimerender
-from decorator import decorator
 
 class Emitter(object):
     def format(self, **results):
