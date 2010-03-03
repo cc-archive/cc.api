@@ -19,8 +19,10 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import cc.license
+from emitters import contenttypes
 
 class index:
+    @contenttypes('xml', 'json')
     def GET(self):
         """ Return a list of the currently supported locales """
         locales = cc.license.locales()

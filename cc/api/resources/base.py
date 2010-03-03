@@ -20,8 +20,10 @@
 
 import cc.license
 import web
+from emitters import contenttypes
 
 class index:
+    @contenttypes('xml', 'json')
     def GET(self):
         """ Returns a list of available license for a given locale. """
         locale = web.input().get('locale', 'en')

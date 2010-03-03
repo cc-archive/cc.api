@@ -22,8 +22,10 @@
 import cc.license
 import web
 import api_exceptions
+from emitters import contenttypes
 
 class index:
+    @contenttypes('xml', 'json')
     def GET(self, selector):
         
         try:
