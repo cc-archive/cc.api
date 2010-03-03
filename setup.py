@@ -35,6 +35,7 @@ setup(
         'lxml',
         'web.py',
         'cc.license',
+        'Paste',
         ],
 
     entry_points = { },

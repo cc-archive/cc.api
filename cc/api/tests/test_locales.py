@@ -1,7 +1,7 @@
 
 import os
 
-from tests.test_common import *
+from cc.api.tests.test_common import *
 
 ####################
 ## Path constants ##

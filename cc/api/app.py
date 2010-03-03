@@ -23,19 +23,22 @@ web.config.debug = True
 
 urls = ( # tuple of url to resource method mappings
     
-    '/',        'resources.base.index',
-    '/locales', 'resources.locales.index',
-    '/details', 'resources.details.index',
+    '/',        'cc.api.resources.base.index',
+    '/classes', 'cc.api.resources.base.index',
+    '/locales', 'cc.api.resources.locales.index',
+    '/details', 'cc.api.resources.details.index',
     
-    '/license/([a-z]+)', 'resources.license.index',
-    '/license/([a-z]+)/(issue|get)', 'resources.license.issue',
+    '/license/([a-z]+)', 'cc.api.resources.license.index',
+    '/license/([a-z]+)/(issue|get)', 'cc.api.resources.license.issue',
     
-    '/simple/chooser',  'resources.simple.chooser',
-    '/support/jurisdictions', 'resources.support.jurisdictions',
+    '/simple/chooser',  'cc.api.resources.simple.chooser',
+    '/support/jurisdictions', 'cc.api.resources.support.jurisdictions',
 
     ) 
     
 app = web.application(urls, globals(),)
+
+web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
 
 if __name__ == "__main__":
     app.run()

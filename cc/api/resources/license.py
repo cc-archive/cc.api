@@ -21,8 +21,8 @@
 
 import cc.license
 import web
-import api_exceptions
-from emitters import contenttypes
+from cc.api import api_exceptions
+from cc.api.emitters import contenttypes
 
 class index:
     @contenttypes('xml', 'json')

@@ -6,8 +6,12 @@ import os
 import operator
 import random
 
-import cherrypy
-import webtest # for the TestApi base class
+from paste.fixture import TestApp
+
+from cc.api.app import app
+
+import web
+web.config.debug = False
 
 ##################
 ## Public names ##
@@ -21,16 +25,7 @@ __all__ = (
 ###############
 ## Constants ##
 ###############
-RELAX_PATH = 'schemata'
-if not os.path.exists(RELAX_PATH):
-    RELAX_PATH = os.path.join('tests', 'schemata')
-
-CFGSTR = 'config:'
-_cfgpath = os.path.join(os.getcwd(), 'server.cfg')
-if os.path.exists(_cfgpath):
-    CFGSTR += _cfgpath
-else:
-    CFGSTR += os.path.join(os.getcwd(), '..', 'server.cfg')
+RELAX_PATH = os.path.join(os.path.dirname(__file__), 'schemata')
 
 TOO_MANY = 25
 
@@ -61,9 +56,9 @@ class TestData:
     def __init__(self):
         """Configure app to query CC API. This is for using live,
            rather than canned, data."""
-        cherrypy.config.update({ 'global' : { 'log.screen' : False, } })
-        self.app = webtest.TestApp(CFGSTR)
-
+        middleware = []
+        self.app = TestApp(app.wsgifunc(*middleware))
+        
     def _permute(self, lists): #TODO: document function
         if lists:
             result = map(lambda i: (i,), lists[0])
@@ -158,14 +153,14 @@ class TestApi:
         """Test fixture for nosetests:
            - sets up the WSGI app server
            - creates test data generator"""
-        cherrypy.config.update({ 'global' : { 'log.screen' : False, } })
-        self.app = webtest.TestApp(CFGSTR)
+        middleware = []
+        self.app = TestApp(app.wsgifunc(*middleware))
         self.data = TestData()
 
     def tearDown(self):
         """Test fixture for nosetests:
            - tears down the WSGI app server"""
-        cherrypy.engine.exit()
+        pass
 
     def makexml(self, bodystr):
         """Wraps text in a root element and escapes some special characters
