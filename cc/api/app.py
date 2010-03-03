@@ -21,8 +21,6 @@
 import web
 web.config.debug = True
 
-from emitter import processor
-
 urls = ( # tuple of url to resource method mappings
     
     '/',        'resources.base.index',
@@ -38,7 +36,6 @@ urls = ( # tuple of url to resource method mappings
     ) 
     
 app = web.application(urls, globals(),)
-app.add_processor(processor)
 
 if __name__ == "__main__":
     app.run()
