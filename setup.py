@@ -19,31 +19,55 @@
 ## DEALINGS IN THE SOFTWARE.
 
 from setuptools import setup, find_packages
+import sys
+
+requires = [
+    'setuptools',
+    'mimerender',
+    'decorator',
+    'lxml',
+    'web.py',
+    'nose',
+    'cc.license',
+    'WebTest',
+    ]
+
+if sys.version_info < (2, 6):
+    requires.append('simplejson')
 
 setup(
     name = "cc.api",
     version = "0.1",
-    url = 'http://api.creativecommons.org',
     
-    packages = find_packages('cc'),
-    package_dir = {'':'cc'},
+    packages = ['cc.api'],
+    namespace_packages = ['cc'],
+    package_dir = {'':'.'},
     
     # scripts and dependencies
-    install_requires = [
-        'mimerender',
-        'decorator',
-        'lxml',
-        'web.py',
-        'cc.license',
-        'Paste',
-        ],
+    install_requires = requires,
 
-    entry_points = { },
+    extras_require = {
+        'fcgi': ['flup'],
+        },
 
+    entry_points = {
+        'console_scripts' : [
+            'server = cc.api.server:serve',
+            'noop = cc.api.server:noop',
+            'api.fcgi = cc.api.server:fcgi',
+            ],
+        'paste.app_factory': [
+            'api=cc.api.server:app_factory',
+            ],
+        },
+
+    test_suite = 'nose.collector',
+    
     # author metadata
     author = 'John E Doig III',
     author_email = 'john@creativecommons.org',
     description = 'Creative Commons REST API web service.',
     license = 'MIT',
+    url = 'http://api.creativecommons.org',
 
     )
