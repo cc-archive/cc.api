@@ -39,21 +39,21 @@ class index:
         for question in lclass.questions():
 
             enums = []
-            for label, value in question.answers():
-                enum = {
-                    '@attributes': {'id': value},
+            for enum in question.answers():
+                enum_ele = {
+                    '@attributes': {'id': enum[1]},
                     'label': {
                         '@attributes': {'lang': locale},
-                        '@text' : label,
+                        '@text' : enum[0],
                         },
                     }
-                if hasattr(enum, "description"):
-                    enum['description'] = {
+                if len(enum) > 2 and enum[2] != {}:
+                    enum_ele['description'] = {
                         '@attributes': {'lang': locale},
-                        '@text': 'Uhm???',
+                        '@text': enum[2],
                         }
                     
-                enums.append(enum)
+                enums.append(enum_ele)
                     
             question = {'@attributes':{'id': question.id},
                         'label':{

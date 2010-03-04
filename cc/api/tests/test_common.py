@@ -6,12 +6,12 @@ import os
 import operator
 import random
 
-from paste.fixture import TestApp
+import webtest
 
-from cc.api.app import app
+import cc.api.app
 
 import web
-web.config.debug = False
+web.config.debug = True
 
 ##################
 ## Public names ##
@@ -56,8 +56,8 @@ class TestData:
     def __init__(self):
         """Configure app to query CC API. This is for using live,
            rather than canned, data."""
-        middleware = []
-        self.app = TestApp(app.wsgifunc(*middleware))
+        
+        self.app = webtest.TestApp(cc.api.app.application.wsgifunc())
         
     def _permute(self, lists): #TODO: document function
         if lists:
@@ -153,10 +153,9 @@ class TestApi:
         """Test fixture for nosetests:
            - sets up the WSGI app server
            - creates test data generator"""
-        middleware = []
-        self.app = TestApp(app.wsgifunc(*middleware))
+        self.app = webtest.TestApp(cc.api.app.application.wsgifunc())
         self.data = TestData()
-
+        
     def tearDown(self):
         """Test fixture for nosetests:
            - tears down the WSGI app server"""

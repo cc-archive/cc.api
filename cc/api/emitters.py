@@ -140,7 +140,8 @@ def contenttypes(*types):
             return mimerender.mimerender(default,
                                          override_input_key='format',
                                          **emitters)(f)(*args, **kwargs)
-        except (mimerender.MimeRenderException, ValueError):
+        except (mimerender.MimeRenderException, ValueError), e:
+            # log the exception
             web.webapi.badrequest()
 
     return decorator(wrapper)

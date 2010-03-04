@@ -36,9 +36,7 @@ urls = ( # tuple of url to resource method mappings
 
     ) 
     
-app = web.application(urls, globals(),)
-
-web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
+application = web.application(urls, globals(),)
 
 if __name__ == "__main__":
-    app.run()
+    application.run()
