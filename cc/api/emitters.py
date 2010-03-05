@@ -18,7 +18,8 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import lxml.etree as ET
+from lxml import etree as ET
+from StringIO import StringIO
 import re
 import json
 import web.webapi
@@ -26,74 +27,19 @@ import mimerender
 from decorator import decorator
 
 class Emitter(object):
-    def format(self, **results):
+    def format(self, results):
         return results
 
 class JSONEmitter(Emitter):
-    def format(self, **results):
+    def format(self, results):
         return json.dumps(results)
 
 class XMLEmitter(Emitter):
-
-    XML_NS = 'http://www.w3.org/XML/1998/namespace'
-    attrib_key = '@attributes'
-    text_key = '@text'
-
-    def child_nodes(self, node):
-        return filter(lambda e: e not in (self.attrib_key,self.text_key), node)
+    def format(self, results):
+        return ET.tostring(results)
     
-    def build_element(self, node, attrib=None, text=None):
-        # need to expand prefixes
-
-        if type(attrib) == dict and attrib.get('lang'):
-            attrib['{%s}lang' % self.XML_NS] = attrib['lang']
-            del attrib['lang']
-            
-        ele = ET.Element(node, attrib)
-        ele.text = text
-        return ele
-    
-    def build_tree(self, parent, children):
-        
-        for c in self.child_nodes(children):
-            if type(children[c]) == list:
-                for obj in children[c]:
-                    if type(obj) == list:
-                        ele = self.build_element(c)
-                        self.build_tree(ele, obj)
-                    elif type(obj == dict):
-                        ele = self.build_element(c,
-                                                 obj.get(self.attrib_key),
-                                                 obj.get(self.text_key))
-                        if self.child_nodes(obj):
-                            self.build_tree(ele, obj)
-                    parent.append(ele)
-            else:
-                if type(children[c]) == dict:
-                    ele = self.build_element(c,
-                                             children[c].get(self.attrib_key),
-                                             children[c].get(self.text_key))
-                    if self.child_nodes(children[c]):
-                        self.build_tree(ele, children[c])
-                else:
-                    ele = self.build_element(c)
-                parent.append(ele)        
-        return parent
-
-    def dict_to_etree(self, d):
-        top = list(d)[0]
-        attrib, text = None, None
-        if type(d[top]) == dict:
-            attrib = d[top].get(self.attrib_key, None)
-            text = d[top].get(self.text_key, None)
-        root = self.build_element(top, attrib, text)
-        return self.build_tree(root, d[top])
-    
-    def format(self, **results):
-        return ET.tostring(self.dict_to_etree(results))
-
 class HTMLEmitter(XMLEmitter):
-    def format(self, **results):
+    def format(self, results):
         # use XMLEmitter's format logic, but set Content-Type to text/html
         return super(HTMLEmitter, self).format(results)
 
@@ -103,7 +49,7 @@ formatters = {
     mimerender.HTML: HTMLEmitter,
 }
 
-def contenttypes(*types):
+def content_types(*types):
     """
     contenttypes is a wrapper to the mimerender decorator.
 
@@ -124,7 +70,7 @@ def contenttypes(*types):
        # TODO: maybe log/catch if type is unsupported, fallback to text?
 
     # default to the first type passed to decorator 
-    default = types[0] in formatters.keys() and types[0] or 'text'
+    default = types[0] in formatters.keys() and types[0] or 'xml'
     
     # mimerender will however throw an exception for invalid formats,
     # to catch these exceptions the mimerender's decorator is wrapped
@@ -136,7 +82,7 @@ def contenttypes(*types):
         media-type short names to a method that can emit the resources'
         returned dicts as xml, json, etc as HTTP responses.
         """
-        try:    
+        try:
             return mimerender.mimerender(default,
                                          override_input_key='format',
                                          **emitters)(f)(*args, **kwargs)

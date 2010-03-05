@@ -21,11 +21,13 @@
 
 import cc.license
 import web
+import lxml.etree as ET
+
 from cc.api import api_exceptions
-from cc.api.emitters import contenttypes
+from cc.api.emitters import content_types
 
 class index:
-    @contenttypes('xml', 'json')
+    @content_types('xml', 'json')
     def GET(self, selector):
         
         try:
@@ -35,44 +37,32 @@ class index:
 
         locale = web.input().get('locale', 'en')
 
-        questions = []
+        root = ET.Element('licenseclass', dict(id=selector))
+        label = ET.SubElement(root, 'label', dict(lang=locale))
+        label.text = lclass.title(locale)
+        
         for question in lclass.questions():
 
-            enums = []
-            for enum in question.answers():
-                enum_ele = {
-                    '@attributes': {'id': enum[1]},
-                    'label': {
-                        '@attributes': {'lang': locale},
-                        '@text' : enum[0],
-                        },
-                    }
-                if len(enum) > 2 and enum[2] != {}:
-                    enum_ele['description'] = {
-                        '@attributes': {'lang': locale},
-                        '@text': enum[2],
-                        }
-                    
-                enums.append(enum_ele)
-                    
-            question = {'@attributes':{'id': question.id},
-                        'label':{
-                            '@attributes':{'lang':locale},
-                            '@text': question.label(locale)},
-                        'type': {
-                            '@text': 'enum'},
-                        'enum': enums,
-                        'description':{
-                            '@attributes':{'lang':locale},
-                            '@text': question.description(locale)}}
-            questions.append(question)
-            
-        return {'licenseclass':{'@attributes':{'id':selector},
-                                'label':{
-                                    '@attributes': {'lang': locale},
-                                    '@text': lclass.title(locale)},
-                                'field': questions}}
+            field = ET.SubElement(root, 'field', dict(id=question.id))
+            label = ET.SubElement(field, 'label', dict(lang=locale))
+            label.text = question.label(locale)
 
-        
+            ET.SubElement(field, 'type').text = 'enum'
+
+            for a_label, a_id, a_desc in question.answers():
+                
+                enum = ET.SubElement(field, 'enum', dict(id=a_id))
+                label = ET.SubElement(enum, 'label', dict(lang=locale))
+                label.text = a_label
+
+                if a_desc:
+                    ET.SubElement(enum,
+                                  'description',
+                                  dict(lang=locale)).text = a_desc
+                    
+            desc = ET.SubElement(field, 'description', dict(lang=locale))
+            desc.text = question.description(locale)
+
+        return root
 
         

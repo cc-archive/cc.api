@@ -19,12 +19,18 @@
 ## DEALINGS IN THE SOFTWARE.
 
 import cc.license
-from cc.api.emitters import contenttypes
+import lxml.etree as ET
+
+from cc.api.emitters import content_types
 
 class index:
-    @contenttypes('xml', 'json')
+    @content_types('xml', 'json')
     def GET(self):
         """ Return a list of the currently supported locales """
         locales = cc.license.locales()
-        return {'locales': { 'locale': [
-                {'@attributes': { 'id': l } } for l in locales ]}}
+
+        root = ET.Element('locales')
+        for l in locales:
+            ET.SubElement(root, 'locale', dict(id=l))
+
+        return root

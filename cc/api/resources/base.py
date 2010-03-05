@@ -20,21 +20,23 @@
 
 import cc.license
 import web
-from cc.api.emitters import contenttypes
+import lxml.etree as ET
+
+from cc.api.emitters import content_types
 
 class index:
-    @contenttypes('xml', 'json')
+    
+    @content_types('xml', 'json')
     def GET(self):
         """ Returns a list of available license for a given locale. """
+
         locale = web.input().get('locale', 'en')
-        classes = cc.license.selectors.SELECTORS    
-        return {
-            'licenses': {
-                'license': [
-                    {
-                        '@attributes' : {'id': selector },
-                        '@text' : lclass.title(locale),
-                    }
-                    for selector, lclass in classes.iteritems() ]
-                }
-            }
+        classes = cc.license.selectors.SELECTORS
+
+        root = ET.Element('licenses')
+        for selector, lclass in classes.iteritems():
+            ET.SubElement(root, 'license', dict(id=selector)).text = \
+                                lclass.title(locale)
+
+        return root
+        
