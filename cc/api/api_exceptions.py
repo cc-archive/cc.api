@@ -18,6 +18,16 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
+def missingparam(param):
+    return {'error':{'id':{'@text':'missingparam'},
+                     'message':{
+                         '@text':'A value for %s must be supplied.' % param }}}
+
 def invalidclass():
     return {'error':{'id':{'@text':'invalidclass'},
                      'message':{'@text':'Invalid License Class.'}}}
+
+def invaliduri():
+    return {'error':{'id':{'@text':'invaliduri'},
+                     'message':{'@text':'Invalid license uri.'}}}
+    
