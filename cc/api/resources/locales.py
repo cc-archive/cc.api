@@ -21,7 +21,7 @@
 import cc.license
 import lxml.etree as ET
 
-from cc.api.emitters import content_types
+from cc.api.handlers import content_types
 
 class index:
     @content_types('xml', 'json')

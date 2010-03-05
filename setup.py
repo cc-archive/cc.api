@@ -23,7 +23,7 @@ import sys
 
 requires = [
     'setuptools',
-    'mimerender',
+    'mimeparse',
     'decorator',
     'lxml',
     'web.py',
