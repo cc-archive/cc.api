@@ -80,11 +80,16 @@ class HTMLHandler(Handler):
 def content_types(*types):
     def wrap(fn, *args, **kwargs):
 
+        # this needs some thought...
+        accept = web.ctx.env.get('HTTP_ACCEPT') or 'text/xml'
+
         # use mimeparse to parse the http Accept header string
-        # restrict matches to the content types supported 
-        mime_type = mimeparse.best_match(HandlerClass.types.keys(),
-                                         web.ctx.env.get('HTTP_ACCEPT')) 
-        
+        # restrict matches to the content types supported
+        try:
+            mime_type = mimeparse.best_match(HandlerClass.types.keys(), accept) 
+        except Exception, e:
+            return e
+            
         if mime_type:
             # find the handler for the requested mime-type
             try:
