@@ -18,16 +18,21 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-def missingparam(param):
-    return {'error':{'id':{'@text':'missingparam'},
-                     'message':{
-                         '@text':'A value for %s must be supplied.' % param }}}
+import lxml.etree as ET
+
+def _error_tree(error_id, message):
+    error = ET.Element('error')
+    ET.SubElement(error, 'id').text = error_id
+    ET.SubElement(error, 'message').text = message
+    return error
 
 def invalidclass():
-    return {'error':{'id':{'@text':'invalidclass'},
-                     'message':{'@text':'Invalid License Class.'}}}
+    return _error_tree('invalidclass', 'Invalid License Class.')
 
 def invaliduri():
-    return {'error':{'id':{'@text':'invaliduri'},
-                     'message':{'@text':'Invalid license uri.'}}}
+    return _error_tree('invaliduri', 'Invalid license uri.')
     
+def missingparam(param):
+    return _error_tree('missingparam',
+                       'A value for %s must be supplied.' & param )
+
