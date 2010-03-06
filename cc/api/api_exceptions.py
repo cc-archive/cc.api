@@ -34,5 +34,5 @@ def invaliduri():
     
 def missingparam(param):
     return _error_tree('missingparam',
-                       'A value for %s must be supplied.' & param )
+                       'A value for %s must be supplied.' % param )
 
