@@ -62,7 +62,7 @@ class index:
         # build an empty Work tree
         rdfns = lambda x: '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}%s'%x
         work = ET.Element('Work', { rdfns('about') : '' })
-        ET.SubElement(work, 'License', { rdfns('resource') : l.uri })
+        ET.SubElement(work, 'license', { rdfns('resource') : l.uri })
         license_rdf.getroot().insert(0, work)
 
         # add RDF trees to the results
@@ -78,3 +78,5 @@ class index:
 
         return root
                 
+    def POST(self):
+        return self.GET()
