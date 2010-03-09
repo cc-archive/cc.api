@@ -27,11 +27,26 @@ import cc.license
 from cc.license.formatters.classes import HTMLFormatter, CC0HTMLFormatter
 
 def validate_answers(selector, answers):
+
     assert answers.xpath('/answers/license-%s' % selector.id)
+
     questions = dict([ (q.id,q) for q in selector.questions()])
+    
     for field in answers.xpath('/answers/license-%s' % selector.id)[0]:
+
+        # ignore jurisdiction fields for licenses that are not ported
+        if field.tag == 'jurisdiction':
+            if field.tag not in questions.keys():
+                continue
+            if not field.text:
+                continue
+
         assert field.tag in questions.keys()
-        assert field.text in [ v for l,v,d in questions[field.tag].answers() ]
+        
+        valid_answers = [ v for l,v,d in questions[field.tag].answers() ]
+
+        assert field.text in valid_answers
+        
     return
 
 def build_answers_dict(selector, answers):
@@ -41,10 +56,12 @@ def build_answers_dict(selector, answers):
     validate_answers(selector, answers)
     
     questions = answers.xpath('/answers/license-%s' % selector.id)[0]
+
     if selector.id == 'standard':
         answers_dict['commercial'] = questions.xpath('commercial')[0].text
         answers_dict['derivatives'] = questions.xpath('derivatives')[0].text
         answers_dict['jurisdiction'] = questions.xpath('jurisdiction')[0].text
+
     elif selector.id == 'recombo':
         answers_dict['sampling'] = questions.xpath('sampling')[0].text
         
