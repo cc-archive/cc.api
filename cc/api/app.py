@@ -28,11 +28,14 @@ urls = ( # tuple of url to resource method mappings
     '/locales', 'cc.api.resources.locales.index',
     '/details', 'cc.api.resources.details.index',
     
-    '/license/([a-z]+)', 'cc.api.resources.license.index',
-    '/license/([a-z]+)/(issue|get)', 'cc.api.resources.license.issue',
+    '/license/([\w\d]+)',             'cc.api.resources.license.index',
+    '/license/([\w\d]+)/(issue|get)', 'cc.api.resources.license.issue',
     
-    '/simple/chooser',  'cc.api.resources.simple.chooser',
-    '/support/jurisdictions', 'cc.api.resources.support.jurisdictions',
+    '/simple/chooser',        'cc.api.resources.simple.chooser',
+    '/simple/chooser.js',     'cc.api.resources.simple.chooser_js',
+    
+    '/support/jurisdictions',    'cc.api.resources.support.jurisdictions',
+    '/support/jurisdictions.js', 'cc.api.resources.support.jurisdictions_js',
 
     ) 
     
