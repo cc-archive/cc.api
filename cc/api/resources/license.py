@@ -18,12 +18,14 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-
-import cc.license
 import web
 import lxml.etree as ET
+from StringIO import StringIO
 
-from cc.api import api_exceptions
+import cc.license
+
+from cc.api import api_exceptions 
+from cc.api import support
 from cc.api.handlers import render_as
 
 class index:
@@ -65,4 +67,50 @@ class index:
 
         return root
 
+class issue:
+    @render_as('xml')
+    def POST(self, selector):
 
+        try:
+            lclass = cc.license.selectors.choose(selector)
+        except cc.license.CCLicenseError:
+            return api_exceptions.invalidclass()
+
+        if not web.input().get('answers'):
+            return api_exceptions.missingparam('answers')
+
+        try:
+            # parse the answers argument into an xml tree
+            answers = ET.parse(StringIO(web.input().get('answers')))
+
+            locale = 'en'
+            # check if a locale has been passed in answers
+            if answers.xpath('/answers/locale'):
+                locale = answers.xpath('/answers/locale')[0].text
+                # verify that this is a valid locale
+                if locale not in cc.license.locales():
+                    return api_exceptions.invalidanswer()
+
+            work_dict = {}
+            # check if work information was included in the answers
+            if answers.xpath('/answers/work-info'):
+                work_info = answers.xpath('/answers/work-info')[0]
+                # returns a dictionary usable by cc.license formatters
+                work_dict = support.build_work_dict(work_info)
+
+            # converts the answer tree into a dictionary
+            # this will trim off any superfluous args in answers
+            # it will also perform validation to ensure that the required
+            # questions are answered with acceptable values
+            answers_dict = support.build_answers_dict(lclass, answers)
+            
+        except (ET.XMLSyntaxError, AssertionError):
+            # either the etree parse failed or support threw back an
+            # exception when the answers tree failed to validate
+            return api_exceptions.invalidanswer()
+
+        # issue the answers dict to the cc.license selector
+        license = lclass.by_answers(answers_dict)
+
+        return support.build_results_tree(license, work_dict, locale)
+        
