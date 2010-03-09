@@ -22,11 +22,11 @@ import cc.license
 import web
 import lxml.etree as ET
 
-from cc.api.handlers import content_types
+from cc.api.handlers import render_as
 
 class index:
     
-    @content_types('xml', 'json')
+    @render_as('xml')
     def GET(self):
         """ Returns a list of available license for a given locale. """
 

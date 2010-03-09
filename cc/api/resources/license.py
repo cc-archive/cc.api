@@ -24,10 +24,10 @@ import web
 import lxml.etree as ET
 
 from cc.api import api_exceptions
-from cc.api.handlers import content_types
+from cc.api.handlers import render_as
 
 class index:
-    @content_types('xml', 'json')
+    @render_as('xml')
     def GET(self, selector):
         
         try:
@@ -65,4 +65,4 @@ class index:
 
         return root
 
-        
+

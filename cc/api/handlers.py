@@ -51,66 +51,86 @@ class Handler(object):
     # the first content_type will be used in the response headers
     content_types = ('text/plain',)
     # this will be the string used in the @content_types decorator
-    short_name = 'default'
+    short_name = 'text'
     # if a response needs to be encoded otherwise, this can be overloaded
-    charset = 'utf-8'
+    encoding = 'utf-8'
     def __init__(self, *args, **kwargs):
         # set the HTTP Content-Type response header 
         web.header('Content-Type', '%s; charset=%s' % (self.content_types[0],
-                                                       self.charset))
+                                                       self.encoding))
     def response(self, results):
         # all resources that use @content_types will return an lxml etree object
-        return ET.tostring(results)
+        if not ET.iselement(results):
+            return ''.join(
+                [ ET.tostring(r, encoding=self.encoding, method='xml')
+                  for r in results ] )
+        # the xml response had a root element...
+        return ET.tostring(results, encoding=self.encoding, method='xml' )
 
 class XMLHandler(Handler):
+
     content_types = ('application/xml', 'application/x-xml', 'text/xml',)
     short_name = 'xml'
+
     def response(self, results):
         """ serialize the results ElementTree object """
+
         sig = '<?xml version="1.0" encoding="utf-8"?>\n'
-        return sig + ET.tostring(results, pretty_print=True)
+        if not ET.iselement(results):
+            return sig + ''.join([
+                ET.tostring(r,pretty_print=True) for r in results])
+
+        else:
+            return ET.tostring(results, encoding=self.encoding,
+                               method='xml', xml_declaration=True,
+                               pretty_print=True)
 
 class HTMLHandler(Handler):
+
     content_types = ('text/html',)
     short_name = 'html'
+    
     def response(self, results):
         """ format the results as html """
-        return ET.tostring(results, pretty_print=True)
+        if not ET.iselement(results):
+            return ''.join(
+                [ ET.tostring(r, encoding=self.encoding,
+                              method='html', pretty_print=True)
+                  for r in results])
 
-def content_types(*types):
+        return ET.tostring(results, encoding=self.encoding,
+                           method='html', pretty_print=True)
+
+def render_as(*types):
     def wrap(fn, *args, **kwargs):
 
         # this needs some thought...
-        accept = web.ctx.env.get('HTTP_ACCEPT') or 'text/xml'
+        http_accept = web.ctx.env.get('HTTP_ACCEPT', None)
 
+        assert types, 'At least one type must be passed to content_types.'
+        
+        supported_types = []
+        for shortname in types:
+            try:
+                
+                h = HandlerClass.handlers[shortname]
+                supported_types.extend([ t for t in h.content_types ])
+                
+            except KeyError, e:
+                raise e, "Invalid type used in content_types decorator."
+        
         # use mimeparse to parse the http Accept header string
         # restrict matches to the content types supported
-        try:
-            mime_type = mimeparse.best_match(HandlerClass.types.keys(), accept) 
-        except Exception, e:
-            return e
-            
-        if mime_type:
-            # find the handler for the requested mime-type
-            try:
+        if http_accept is not None:
+            mime_type = mimeparse.best_match(supported_types, http_accept)
+
+            if mime_type == '':
+                handler = HandlerClass.handlers[types[0]]
+            else:
                 handler = HandlerClass.types[mime_type]
-
-                # only use handlers passed into the decorator
-                if handler.short_name not in types:
-                    return web.webapi.badrequest()
-
-            except KeyError:
-                # this mimetype is unsupported
-                # fallback to a default Handler, which would be the first
-                # handler shortname passed to the decorator
-                return web.webapi.badrequest()
         else:
-            # if no match is found by mimeparse, then an empty string is
-            # returned need to fall back to the default handler in this case
-            try:
-                handler = HandlerClass.handlers['default']
-            except KeyError:
-                raise Exception("A default handler has not been set.")
+            handler = HandlerClass.handlers[types[0]]
+            
         try:
             # if results is not an lxml Element, then the handler will
             # throw an exception. if the resource resulted in anything
@@ -119,9 +139,15 @@ def content_types(*types):
             
             return handler().response(fn(*args, **kwargs))
             
-        except TypeError:
-
+        except TypeError, e:
+            print e
             # this decorator is only good for results that are serializable
             return web.internalerror()
         
+    return decorator(wrap)
+
+def content_type(content_type, encoding='utf-8'):
+    def wrap(fn, *args, **kwargs):
+        web.header('Content-Type', '%s; charset=%s' % (content_type, encoding))
+        return fn(*args, **kwargs)
     return decorator(wrap)

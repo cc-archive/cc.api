@@ -21,10 +21,10 @@
 import cc.license
 import lxml.etree as ET
 
-from cc.api.handlers import content_types
+from cc.api.handlers import render_as
 
 class index:
-    @content_types('xml', 'json')
+    @render_as('xml')
     def GET(self):
         """ Return a list of the currently supported locales """
         locales = cc.license.locales()

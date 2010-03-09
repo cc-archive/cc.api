@@ -26,11 +26,11 @@ from copy import deepcopy
 
 from cc.license.formatters.classes import HTMLFormatter, CC0HTMLFormatter
 from cc.api.api_exceptions import missingparam, invaliduri
-from cc.api.handlers import content_types
+from cc.api.handlers import render_as
 
 class index:
     
-    @content_types('xml', 'html')
+    @render_as('xml', 'html')
     def GET(self):
         """ Accepts a license uri as an argument and will return
         the RDF and RDFa of a licnsee """
