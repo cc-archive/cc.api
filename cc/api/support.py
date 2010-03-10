@@ -54,22 +54,30 @@ def build_answers_dict(selector, answers):
     answers_dict = {}
 
     validate_answers(selector, answers)
-    
+
     questions = answers.xpath('/answers/license-%s' % selector.id)[0]
-
-    if selector.id == 'standard':
-        answers_dict['commercial'] = questions.xpath('commercial')[0].text
-        answers_dict['derivatives'] = questions.xpath('derivatives')[0].text
-        answers_dict['jurisdiction'] = questions.xpath('jurisdiction')[0].text
-
-    elif selector.id == 'recombo':
-        answers_dict['sampling'] = questions.xpath('sampling')[0].text
-        
+    
+    for field in [ q.id for q in selector.questions() ]:
+        answers_dict[field] = questions.xpath(field)[0].text
+    
     if answers.xpath('/answers/work-info'):
         # build work-info dict
         pass
 
     return answers_dict
+
+def ambiguous_work_dict(work_dict):
+    """ There is some ambiguity to the key names of the work_dicts, use this
+    function to get around those inconsistencies. e.g. title (Standard
+    formatter uses the 'worktitle' key, CC0 uses 'work_title', API <answers>
+    string uses 'title' """
+
+    if 'title' in work_dict.keys():
+        # don't overwrite the other keys if they exist
+        work_dict.setdefault('worktitle', work_dict['title'])
+        work_dict.setdefault('work_title', work_dict['title'])
+
+    return work_dict
 
 def build_results_tree(license, work_dict=None, locale='en'):
 
@@ -85,6 +93,11 @@ def build_results_tree(license, work_dict=None, locale='en'):
 
     # parse the RDF and RDFa from cc.license
     license_rdf = ET.parse( StringIO(license.rdf) )
+
+    # support various arguments keys in the work_dict
+    if work_dict: work_dict = ambiguous_work_dict(work_dict)
+
+    # prepare the RDFa for xml parsing
     rdfa = formatter().format(license, work_dict, locale)
     license_rdfa = ET.parse(StringIO('<p>%s</p>' % rdfa))
 
