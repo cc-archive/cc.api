@@ -89,7 +89,7 @@ class issue:
                 locale = answers.xpath('/answers/locale')[0].text
                 # verify that this is a valid locale
                 if locale not in cc.license.locales():
-                    return api_exceptions.invalidanswer()
+                    locale = 'en' # just fallback, don't throw up
 
             work_dict = {}
             # check if work information was included in the answers
@@ -104,7 +104,7 @@ class issue:
             # questions are answered with acceptable values
             answers_dict = support.build_answers_dict(lclass, answers)
             
-        except (ET.XMLSyntaxError, AssertionError):
+        except (ET.XMLSyntaxError, AssertionError), e:
             # either the etree parse failed or support threw back an
             # exception when the answers tree failed to validate
             return api_exceptions.invalidanswer()
@@ -114,3 +114,36 @@ class issue:
 
         return support.build_results_tree(license, work_dict, locale)
         
+class issue_get:
+    @render_as('xml')
+    def GET(self, selector):
+        
+        answers = { 'work-info': {} }
+
+        """ strictly use strings, cc.license doesn't check `if unicode` before
+        a variable reaches a librdf query, which will blow shit up """
+        
+        if selector == 'standard':
+            answers['commercial'] = str(web.input().get('commercial', 'y'))
+            answers['derivatives'] = str(web.input().get('derivatives', 'y'))
+        elif selector == 'recombo':
+            answers['sampling'] = str(web.input().get('sampling', 'sampling'))
+
+        answers['jurisdiction'] = str(web.input().get('jurisdiction', ''))
+        answers['locale'] = str(web.input().get('locale', 'en'))
+
+        # dump the extra arguments into the work-info dict
+        answers['work-info'].update(dict(
+            [(str(k),str(v)) for k,v in web.input().items() if k not in answers]
+            ))
+
+        try:
+            lclass = cc.license.selectors.choose(selector)
+        except cc.license.CCLicenseError:
+            return api_exceptions.invalidclass()
+
+        license = lclass.by_answers(answers)
+
+        return support.build_results_tree(license,
+                                          answers['work-info'],
+                                          answers['locale'])
