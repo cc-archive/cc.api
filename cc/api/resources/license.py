@@ -38,32 +38,35 @@ class index:
             return api_exceptions.invalidclass()
 
         locale = web.input().get('locale', 'en')
-
-        root = ET.Element('licenseclass', dict(id=selector))
-        label = ET.SubElement(root, 'label', dict(lang=locale))
+        lang = "{http://www.w3.org/XML/1998/namespace}lang"
+        
+        root = ET.Element('licenseclass', {'id':selector})
+        label = ET.SubElement(root, 'label', {lang:locale})
         label.text = lclass.title(locale)
         
         for question in lclass.questions():
 
-            field = ET.SubElement(root, 'field', dict(id=question.id))
-            label = ET.SubElement(field, 'label', dict(lang=locale))
+            field = ET.SubElement(root, 'field',  {'id':question.id})
+
+            label = ET.SubElement(field, 'label', {lang:locale})
             label.text = question.label(locale)
 
+            desc = ET.SubElement(field, 'description', {lang:locale})
+            desc.text = question.description(locale)
+            
             ET.SubElement(field, 'type').text = 'enum'
 
             for a_label, a_id, a_desc in question.answers():
                 
-                enum = ET.SubElement(field, 'enum', dict(id=a_id))
-                label = ET.SubElement(enum, 'label', dict(lang=locale))
+                enum = ET.SubElement(field, 'enum',  {'id':a_id})
+                label = ET.SubElement(enum, 'label', {lang:locale})
                 label.text = a_label
 
                 if a_desc:
                     ET.SubElement(enum,
                                   'description',
-                                  dict(lang=locale)).text = a_desc
+                                  {lang:locale}).text = a_desc
                     
-            desc = ET.SubElement(field, 'description', dict(lang=locale))
-            desc.text = question.description(locale)
 
         return root
 
@@ -82,33 +85,38 @@ class issue:
         try:
             # parse the answers argument into an xml tree
             answers = ET.parse(StringIO(web.input().get('answers')))
-
-            locale = 'en'
-            # check if a locale has been passed in answers
-            if answers.xpath('/answers/locale'):
-                locale = answers.xpath('/answers/locale')[0].text
-                # verify that this is a valid locale
-                if locale not in cc.license.locales():
-                    locale = 'en' # just fallback, don't throw up
-
-            work_dict = {}
-            # check if work information was included in the answers
-            if answers.xpath('/answers/work-info'):
-                work_info = answers.xpath('/answers/work-info')[0]
-                # returns a dictionary usable by cc.license formatters
-                work_dict = support.build_work_dict(work_info)
-
-            # converts the answer tree into a dictionary
-            # this will trim off any superfluous args in answers
-            # it will also perform validation to ensure that the required
-            # questions are answered with acceptable values
-            answers_dict = support.build_answers_dict(lclass, answers)
             
-        except (ET.XMLSyntaxError, AssertionError), e:
-            # either the etree parse failed or support threw back an
-            # exception when the answers tree failed to validate
+        except ET.XMLSyntaxError, e:
             return api_exceptions.invalidanswer()
 
+        # converts the answer tree into a dictionary
+        # this will trim off any superfluous args in answers
+        # it will also perform validation to ensure that the required
+        # questions are answered with acceptable value
+
+        try:
+            support.validate_answers(lclass, answers)
+        except AssertionError, e:
+            return api_exceptions.invalidanswer()
+        
+
+        answers_dict = support.build_answers_dict(lclass, answers)
+
+        locale = 'en'
+        # check if a locale has been passed in answers
+        if answers.xpath('/answers/locale'): 
+            locale = answers.xpath('/answers/locale')[0].text
+            # verify that this is a valid locale
+            if locale not in cc.license.locales():
+                locale = 'en' # just fallback, don't throw up
+
+        work_dict = {}
+        # check if work information was included in the answers
+        if answers.xpath('/answers/work-info'):
+            work_info = answers.xpath('/answers/work-info')[0]
+            # returns a dictionary usable by cc.license formatters
+            work_dict = support.build_work_dict(work_info)
+        
         # issue the answers dict to the cc.license selector
         license = lclass.by_answers(answers_dict)
 
@@ -118,32 +126,34 @@ class issue_get:
     @render_as('xml')
     def GET(self, selector):
         
-        answers = { 'work-info': {} }
-
-        """ strictly use strings, cc.license doesn't check `if unicode` before
-        a variable reaches a librdf query, which will blow shit up """
+        args = web.input()
+        locale = str(args.get('locale'))
+        if locale not in cc.license.locales():
+            locale = 'en'
         
-        if selector == 'standard':
-            answers['commercial'] = str(web.input().get('commercial', 'y'))
-            answers['derivatives'] = str(web.input().get('derivatives', 'y'))
-        elif selector == 'recombo':
-            answers['sampling'] = str(web.input().get('sampling', 'sampling'))
-
-        answers['jurisdiction'] = str(web.input().get('jurisdiction', ''))
-        answers['locale'] = str(web.input().get('locale', 'en'))
-
-        # dump the extra arguments into the work-info dict
-        answers['work-info'].update(dict(
-            [(str(k),str(v)) for k,v in web.input().items() if k not in answers]
-            ))
-
         try:
             lclass = cc.license.selectors.choose(selector)
         except cc.license.CCLicenseError:
             return api_exceptions.invalidclass()
+        
+        # build an answers xml tree
+        answers = ET.Element('answers')
+        questions = ET.SubElement(answers, 'license-%s' % selector)
 
-        license = lclass.by_answers(answers)
+        for question in lclass.questions():
+            default_answer = question.answers()[0][1]
+            ET.SubElement(questions, question.id).text = \
+                          str(args.get(question.id, default_answer))
 
-        return support.build_results_tree(license,
-                                          answers['work-info'],
-                                          answers['locale'])
+        try:
+            support.validate_answers(lclass, answers)
+        except AssertionError, e:
+            raise e
+        
+        answers_dict = support.build_answers_dict(lclass, answers)
+        
+        # build the work_dict
+        
+        issued_license = lclass.by_answers(answers_dict)
+
+        return support.build_results_tree(issued_license, {}, locale)

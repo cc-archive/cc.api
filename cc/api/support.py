@@ -28,37 +28,39 @@ from cc.license.formatters.classes import HTMLFormatter, CC0HTMLFormatter
 
 def validate_answers(selector, answers):
 
-    assert answers.xpath('/answers/license-%s' % selector.id)
-
-    questions = dict([ (q.id,q) for q in selector.questions()])
+    assert answers.xpath('/answers/license-%s' % selector.id), \
+           'license-class required'
     
-    for field in answers.xpath('/answers/license-%s' % selector.id)[0]:
+    answers = answers.xpath('/answers/license-%s' % selector.id)[0]
 
-        # ignore jurisdiction fields for licenses that are not ported
-        if field.tag == 'jurisdiction':
-            if field.tag not in questions.keys():
-                continue
-            if not field.text:
-                continue
+    # don't allow answers to irrelevant questions for this class (except juri)
+    for answer in answers:
+        assert answer.tag in [ q.id for q in selector.questions() ] or \
+               answer.tag == 'jurisdiction', '%s question not allowed.' % answer
+    
+    for question in selector.questions():
+        # assert that the question was answered
+        assert answers.xpath(question.id), "%s answer not found." % question.id
 
-        assert field.tag in questions.keys()
+        answer = answers.xpath(question.id)[0]
+        valid_answers = [ v for l,v,d in question.answers() ]
         
-        valid_answers = [ v for l,v,d in questions[field.tag].answers() ]
-
-        assert field.text in valid_answers
+        if question.id == 'jurisdiction' and answer.text not in valid_answers:
+            answer.text = '' # silently fall back to Unported
+        
+        assert answer.text in valid_answers, "%s not in [%s]." % \
+               (answer.text, ','.join(valid_answers))
         
     return
 
 def build_answers_dict(selector, answers):
     # builds answer dict thats usable in cc.license
-    answers_dict = {}
-
-    validate_answers(selector, answers)
-
+    
+    answers_dict = {}      
     questions = answers.xpath('/answers/license-%s' % selector.id)[0]
     
-    for field in [ q.id for q in selector.questions() ]:
-        answers_dict[field] = questions.xpath(field)[0].text
+    for field in selector.questions():
+        answers_dict[field.id] = questions.xpath(field.id)[0].text
     
     if answers.xpath('/answers/work-info'):
         # build work-info dict
