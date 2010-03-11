@@ -11,7 +11,7 @@ import webtest
 import cc.api.app
 
 import web
-web.config.debug = True
+web.config.debug = False
 
 ##################
 ## Public names ##
@@ -79,7 +79,11 @@ class TestData:
         """Retrieve the license information for this class, and generate 
            a set of answers for use with testing."""
         enums = [('jurisdiction', ['', 'us', 'de', 'uk'])]
-        if lclass in ['publicdomain', 'recombo', 'zero']:
+        if lclass in ['publicdomain', 'zero']:
+            return enums
+        elif lclass == 'recombo':
+            enums.append(('sampling',
+                          ['sampling','samplingplus','ncsamplingplus']))
             return enums
         else:
             enums.append(('commercial', ['y', 'n']))
@@ -121,6 +125,7 @@ class TestData:
         return all_params
 
     # TODO: fix hackery
+    # TODO: should rely on cc.license from here on....!!!
     def xml_answers(self, lclass):
         all_params = self.params(lclass)
         for params in all_params:

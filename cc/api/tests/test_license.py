@@ -51,7 +51,7 @@ class TestLicense(TestApi):
                                       params={'answers':answers}).body
                 get = self.app.get('/license/%s/get%s' %
                                      (lclass, query_string)).body
-                assert get == issue
+                assert get == issue, "%s %s" % (answers, query_string)
 
     def test_extra_args(self):
         """/license extra nonsense arguments."""
@@ -92,11 +92,11 @@ class TestLicenseIssue(TestApi):
     def _issue(self, lclass):
         """Common /issue testing code."""
         for answers in self.data.xml_answers(lclass):
-            res = self.app.post('/license/%s/issue' % lclass,
-                                     params={'answers':answers})
             print 'lclass: %s' % lclass
             print 'answers: %s' % answers
             print
+            res = self.app.post('/license/%s/issue' % lclass,
+                                     params={'answers':answers})
             assert relax_validate(RELAX_ISSUE, res.body)
 
     def test_license_standard(self):
