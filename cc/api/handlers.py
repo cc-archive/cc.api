@@ -117,11 +117,11 @@ def render_as(*types):
                 supported_types.extend([ t for t in h.content_types ])
                 
             except KeyError, e:
-                raise e, "Invalid type used in content_types decorator."
+                return web.internalerror()
         
         # use mimeparse to parse the http Accept header string
         # restrict matches to the content types supported
-        if http_accept is not None:
+        if http_accept:
             mime_type = mimeparse.best_match(supported_types, http_accept)
 
             if mime_type == '':
@@ -136,11 +136,14 @@ def render_as(*types):
             # throw an exception. if the resource resulted in anything
             # other than an xml tree then this decorator should not be
             # used for that resource's method.
+            try:
+                result = fn(*args, **kwargs)
+            except Exception, e:
+                return web.internalerror()
             
-            return handler().response(fn(*args, **kwargs))
+            return handler().response(result)
             
         except TypeError, e:
-            print e
             # this decorator is only good for results that are serializable
             return web.internalerror()
         
