@@ -135,25 +135,17 @@ class issue_get:
             lclass = cc.license.selectors.choose(selector)
         except cc.license.CCLicenseError:
             return api_exceptions.invalidclass()
+
+        answers = support.build_answers_xml(lclass, args)
         
-        # build an answers xml tree
-        answers = ET.Element('answers')
-        questions = ET.SubElement(answers, 'license-%s' % selector)
-
-        for question in lclass.questions():
-            default_answer = question.answers()[0][1]
-            ET.SubElement(questions, question.id).text = \
-                          str(args.get(question.id, default_answer))
-
         try:
             support.validate_answers(lclass, answers)
         except AssertionError, e:
-            raise e
+            return api_exceptions.invalidanswer()
         
         answers_dict = support.build_answers_dict(lclass, answers)
-        
-        # build the work_dict
+        work_dict = support.build_work_dict(answers)
         
         issued_license = lclass.by_answers(answers_dict)
-
-        return support.build_results_tree(issued_license, {}, locale)
+        
+        return support.build_results_tree(issued_license, work_dict, locale)

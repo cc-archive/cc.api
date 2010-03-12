@@ -32,7 +32,6 @@ def validate_answers(selector, answers):
            'license-class required'
     
     answers = answers.xpath('/answers/license-%s' % selector.id)[0]
-
     # don't allow answers to irrelevant questions for this class (except juri)
     for answer in answers:
         assert answer.tag in [ q.id for q in selector.questions() ] or \
@@ -44,14 +43,13 @@ def validate_answers(selector, answers):
 
         answer = answers.xpath(question.id)[0]
         valid_answers = [ v for l,v,d in question.answers() ]
-        
         if question.id == 'jurisdiction' and answer.text not in valid_answers:
             answer.text = '' # silently fall back to Unported
         
         assert answer.text in valid_answers, "%s not in [%s]." % \
                (answer.text, ','.join(valid_answers))
         
-    return
+    return True
 
 def build_answers_dict(selector, answers):
     # builds answer dict thats usable in cc.license
@@ -62,23 +60,48 @@ def build_answers_dict(selector, answers):
     for field in selector.questions():
         answers_dict[field.id] = questions.xpath(field.id)[0].text
     
-    if answers.xpath('/answers/work-info'):
-        # build work-info dict
-        pass
-
     return answers_dict
 
-def ambiguous_work_dict(work_dict):
-    """ There is some ambiguity to the key names of the work_dicts, use this
-    function to get around those inconsistencies. e.g. title (Standard
-    formatter uses the 'worktitle' key, CC0 uses 'work_title', API <answers>
-    string uses 'title' """
+def build_answers_xml(selector, args):
+    # build an answers xml tree
+    answers = ET.Element('answers')
+    questions = ET.SubElement(answers, 'license-%s' % selector.id)
+    
+    # build the required answer elements
+    for question in selector.questions():
+        default_answer = question.answers()[0][1]
+        ET.SubElement(questions, question.id).text = \
+                                 str(args.get(question.id, default_answer))
 
-    if 'title' in work_dict.keys():
+    # shove anything else in the args dict into the work-info
+    work_info = ET.SubElement(answers, 'work-info')
+    for field in args:
+        if questions.xpath('%s' % field) == [] and \
+           answers.xpath('%s' % field) == []:
+            # append an element for this argument
+            ET.SubElement(work_info, field).text = args[field]
+
+    return answers
+    
+def build_work_dict(answers):
+
+    work_dict = {}
+
+    if not answers.xpath('/answers/work-info'):
+        return work_dict
+    
+    work_info = answers.xpath('/answers/work-info')[0]
+    for item in work_info:
+        work_dict[item.tag] = item.text
+
+    if 'type' in work_dict:
+        work_dict.setdefault('format', work_dict['type'])
+    
+    if 'title' in work_dict:
         # don't overwrite the other keys if they exist
         work_dict.setdefault('worktitle', work_dict['title'])
         work_dict.setdefault('work_title', work_dict['title'])
-
+        
     return work_dict
 
 def build_results_tree(license, work_dict=None, locale='en'):
@@ -90,15 +113,12 @@ def build_results_tree(license, work_dict=None, locale='en'):
 
     root = ET.Element('result')
     # add the license uri and name
-    ET.SubElement(root, 'license-uri').text = unicode(license.uri)
-    ET.SubElement(root, 'license-name').text = unicode(license.title(locale))
+    ET.SubElement(root, 'license-uri').text = license.uri
+    ET.SubElement(root, 'license-name').text = license.title(locale)
 
     # parse the RDF and RDFa from cc.license
     license_rdf = ET.parse( StringIO(license.rdf) )
-
-    # support various arguments keys in the work_dict
-    if work_dict: work_dict = ambiguous_work_dict(work_dict)
-
+    
     # prepare the RDFa for xml parsing
     rdfa = formatter().format(license, work_dict, locale)
     license_rdfa = ET.parse(StringIO('<p>%s</p>' % rdfa))
@@ -108,7 +128,7 @@ def build_results_tree(license, work_dict=None, locale='en'):
     work = ET.Element('Work', { rdfns('about') : '' })
     ET.SubElement(work, 'license', { rdfns('resource') : license.uri })
     license_rdf.getroot().insert(0, work)
-
+    
     # add RDF trees to the results
     ET.SubElement(root, 'rdf').append(license_rdf.getroot())
     license_rdf = deepcopy(license_rdf)
