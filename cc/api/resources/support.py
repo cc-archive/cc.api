@@ -24,14 +24,10 @@ import lxml.etree as ET
 
 from cc.api.handlers import render_as, content_type
 
-def jurisdictions_dropdown():
+def jurisdictions_dropdown(locale, select=None):
     """ Returns a list of html option element as lxml Element objects.
     If a select tag is specified, an lxml ElementTree is returned where the
     root is an html select tag with options elements as its children. """
-
-    # collect query string arguments
-    locale = web.input().get('locale', 'en')
-    select = web.input().get('select', None)
 
     options = []
     juri_selector = 'http://creativecommons.org/international/%s/'
@@ -54,27 +50,35 @@ class jurisdictions:
     
     @render_as('html')
     def GET(self):
-        return jurisdictions_dropdown()
+        # collect query string arguments
+        locale = web.input().get('locale', 'en')
+        select = web.input().get('select', None)
+
+        return jurisdictions_dropdown(locale, select)
         
 class jurisdictions_js:
 
     @content_type('text/plain')
     def GET(self):
+        # collect query string arguments
+        locale = web.input().get('locale', 'en')
+        select = web.input().get('select', None)
 
-        html = jurisdictions_dropdown()
+        html = jurisdictions_dropdown(locale, select)
 
         # is there a root <select> tag included
         if ET.iselement(html):
-            # this doesn't feel right, but it works all the same...
-            # ignore the last element which will always be an empty string
-            select = ET.tostring(html, pretty_print=True).split('\n')[:-1]
-            for node in select:
-                yield "document.write('%s');\n" % node.strip() # remove padding
+            yield "document.write('<select name=\"%s\">');\n" % \
+                  html.attrib['name']
             
-        else:    
-            for node in html:
-                yield "document.write('%s');\n" % ET.tostring(node)
+        for node in html:
+            yield "document.write('%s');\n" % ET.tostring(node)
 
+        if ET.iselement(html):
+            yield "document.write('</select>');"
+
+        return
+        
             
         
     

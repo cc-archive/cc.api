@@ -25,23 +25,15 @@ import lxml.etree as ET
 
 from cc.api.handlers import render_as, content_type
 
-def chooser_dropdown():
-    # collect query string parameters
-    jurisdiction = web.input().get('jurisdiction', None)
-    exclude = web.input().get('exclude', [])
-    locale = web.input().get('locale', 'en')
-    select = web.input().get('select', None)
-
-    # ensure exclude is a list
-    if type(exclude) != list: exclude = [exclude]
-
+def chooser_dropdown(jurisdiction, exclude, locale, select=None):
+    
     codes = ['by', 'by-sa', 'by-nc', 'by-nd', 'by-nc-nd', 'publicdomain']
 
     options = []
     for code in codes:
         l = cc.license.by_code(code, jurisdiction) # fails on CC0 :/
-        if l.uri in exclude:
-            continue
+        if filter(lambda e: e in l.uri, exclude):
+            continue # license url contains a string found in exclude list
         option = ET.Element('option', dict(value=l.uri))
         option.text = l.title(locale)
         options.append(option)
@@ -64,23 +56,40 @@ class chooser:
     @render_as('html')
     def GET(self):
         """ done this way so that the xml logic isn't serialized """
-        return chooser_dropdown()
+        # collect query string parameters
+        jurisdiction = web.input().get('jurisdiction', None)
+        exclude = web.input().get('exclude', [])
+        locale = web.input().get('locale', 'en')
+        select = web.input().get('select', None)
+        # ensure exclude is a list
+        if type(exclude) != list: exclude = [exclude]
+
+        return chooser_dropdown(jurisdiction, exclude, locale, select)
 
 class chooser_js:
     @content_type('text/plain')
     def GET(self):
+        
+        # collect query string parameters
+        jurisdiction = web.input().get('jurisdiction', None)
+        exclude = web.input().get('exclude', [])
+        locale = web.input().get('locale', 'en')
+        select = web.input().get('select', None)
 
-        html = chooser_dropdown()
-
+        # ensure exclude is a list
+        if type(exclude) != list: exclude = [exclude]
+        
+        html = chooser_dropdown(jurisdiction, exclude, locale, select)
+        
         # is there a root <select> tag included
         if ET.iselement(html):
-            # this doesn't feel right, but it works all the same...
-            # ignore the last element which will always be an empty string
-            select = ET.tostring(html, pretty_print=True).split('\n')[:-1]
-            for node in select:
-                yield "document.write('%s');\n" % node.strip() # remove padding
+            yield "document.write('<select name=\"%s\">');\n" % \
+                  html.attrib['name']
             
-        else:    
-            for node in html:
-                yield "document.write('%s');\n" % ET.tostring(node)
+        for node in html:
+            yield "document.write('%s');\n" % ET.tostring(node)
 
+        if ET.iselement(html):
+            yield "document.write('</select>');"
+
+        return 

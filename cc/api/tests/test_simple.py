@@ -1,6 +1,6 @@
 
 import os
-
+import lxml.html
 from cc.api.tests.test_common import *
 
 ####################
@@ -24,12 +24,33 @@ class TestChooser(TestApi):
         """Test javascript wrapper over /simple/chooser."""
         res = self.app.get('/simple/chooser')
         jsres = self.app.get('/simple/chooser.js')
-        opts = res.body.strip().split('\n')
-        jsopts = jsres.body.strip().split('\n')
-        assert len(opts) == len(jsopts)
-        for i in range(len(opts)):
-            assert "document.write('%s');" % opts[i] == jsopts[i]
 
+        opts = lxml.html.fromstring(res.body)
+        jsopts = jsres.body.strip().split('\n')
+
+        assert len(opts) == len(jsopts)
+        
+        for i,opt in enumerate(opts):
+            assert "document.write('%s');" % lxml.html.tostring(opt) == jsopts[i]
+
+        # attempt with select tag...
+        res = self.app.get('/simple/chooser?select=testing')
+        jsres = self.app.get('/simple/chooser.js?select=testing')
+
+        opts = lxml.html.fromstring(res.body)
+        jsopts = jsres.body.strip().split('\n')
+
+        #  <select> <options> </select>
+        assert (1 + len(opts) + 1) == len(jsopts)
+
+        assert jsopts[0] == "document.write('<select name=\"testing\">');"
+        assert opts.attrib['name'] == 'testing'
+
+        jsopts = jsopts[1:-1] # strip off select tags
+        for i,opt in enumerate(opts):
+            assert "document.write('%s');" % lxml.html.tostring(opt) == jsopts[i]
+
+    
     def test_ignore_extra_args(self):
         """Extra arguments are ignored."""
         res = self.app.get('/simple/chooser?foo=bar')
