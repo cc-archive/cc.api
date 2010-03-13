@@ -99,7 +99,6 @@ class issue:
         except AssertionError, e:
             return api_exceptions.invalidanswer()
         
-
         answers_dict = support.build_answers_dict(lclass, answers)
 
         locale = 'en'
@@ -119,8 +118,11 @@ class issue:
         
         # issue the answers dict to the cc.license selector
         license = lclass.by_answers(answers_dict)
-
-        return support.build_results_tree(license, work_dict, locale)
+        
+        try:
+            return support.build_results_tree(license, work_dict, locale)
+        except:
+            return api_exceptions.pythonerr()
         
 class issue_get:
     @render_as('xml')
@@ -147,5 +149,9 @@ class issue_get:
         work_dict = support.build_work_dict(answers)
         
         issued_license = lclass.by_answers(answers_dict)
+
+        try:
+            return support.build_results_tree(issued_license, work_dict, locale)
+        except:
+            return api_exceptions.pythonerr()
         
-        return support.build_results_tree(issued_license, work_dict, locale)
