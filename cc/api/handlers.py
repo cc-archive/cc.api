@@ -75,7 +75,7 @@ class XMLHandler(Handler):
     def response(self, results):
         """ serialize the results ElementTree object """
 
-        sig = '<?xml version="1.0" encoding="utf-8"?>\n'
+        sig = '<?xml version="1.0" encoding="%s"?>\n' % self.encoding
         if not ET.iselement(results):
             return sig + ''.join([
                 ET.tostring(r,pretty_print=True) for r in results])
