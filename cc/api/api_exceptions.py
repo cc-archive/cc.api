@@ -41,8 +41,3 @@ def pythonerr():
 def missingparam(param):
     return _error_tree('missingparam',
                        'A value for %s must be supplied.' % param )
-
-def invalidmethod(*methods):
-    return _error_tree('invalidmethod',
-                       'This resource only supports the %s method%s.' % \
-                       (','.join(methods), (len(methods) > 1 and 's' or '')))
