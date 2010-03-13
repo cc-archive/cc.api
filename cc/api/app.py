@@ -42,5 +42,5 @@ urls = ( # tuple of url to resource method mappings
     
 application = web.application(urls, globals(),)
 
-if __name__ == "__main__":
-    application.run()
+if __name__ == "__main__": application.run()
+
