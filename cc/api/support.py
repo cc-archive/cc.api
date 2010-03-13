@@ -26,6 +26,21 @@ from copy import deepcopy
 import cc.license
 from cc.license.formatters.classes import HTMLFormatter, CC0HTMLFormatter
 
+HTML_FORMATTER_KEYS = {
+    'source-url': 'source_work',
+    'type': 'format',
+    'title': 'attribution_name',
+    'attribution_name': 'attribution_name',
+    'attribution_url' : 'attribution_url',
+    'more_permissions_url': 'more_permissions_url',
+    }
+CC0_FORMATTER_KEYS = {
+    'title': 'work_title',
+    'actor_href': 'actor_href',
+    'work_jurisdiction': 'work_jurisdiction',
+    'name': 'name',
+    }
+    
 def validate_answers(selector, answers):
 
     assert answers.xpath('/answers/license-%s' % selector.id), \
@@ -86,30 +101,24 @@ def build_answers_xml(selector, args):
 def build_work_dict(answers):
 
     work_dict = {}
-
-    if not answers.xpath('/answers/work-info'):
+    
+    if not answers.xpath('/answers/work-info') or \
+           len(answers.xpath('/answers/work-info')[0]) == 0:
         return work_dict
     
     work_info = answers.xpath('/answers/work-info')[0]
+    if answers.xpath('/answers/license-zero'):
+        formatter_keys = CC0_FORMATTER_KEYS
+    else:
+        formatter_keys = HTML_FORMATTER_KEYS
+        
     for item in work_info:
-        work_dict[item.tag] = item.text
-
-    if 'type' in work_dict:
-        work_dict.setdefault('format', work_dict['type'])
-    
-    if 'title' in work_dict:
-        # don't overwrite the other keys if they exist
-        work_dict.setdefault('worktitle', work_dict['title'])
-        work_dict.setdefault('work_title', work_dict['title'])
+        if item.tag in formatter_keys.keys():
+            work_dict[ formatter_keys[item.tag] ] = item.text
         
     return work_dict
 
 def build_results_tree(license, work_dict=None, locale='en'):
-
-    if license.license_code == 'CC0':
-        formatter = CC0HTMLFormatter
-    else: # more common case
-        formatter = HTMLFormatter
 
     root = ET.Element('result')
     # add the license uri and name
@@ -120,7 +129,17 @@ def build_results_tree(license, work_dict=None, locale='en'):
     license_rdf = ET.parse( StringIO(license.rdf) )
     
     # prepare the RDFa for xml parsing
-    rdfa = formatter().format(license, work_dict, locale)
+    try:
+        if license.license_code == 'CC0':
+            rdfa = CC0HTMLFormatter().format(license, work_dict, locale)
+        else:
+            rdfa = HTMLFormatter().format(license, work_dict, locale)
+    except Exception,e:
+        # cc.license formatter choked on something
+        # such an example would be an invalid work_jurisdiction value passed
+        # to the CC0 formatter
+        raise e
+    
     license_rdfa = ET.parse(StringIO('<p>%s</p>' % rdfa))
 
     # build a Work tree
