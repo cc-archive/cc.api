@@ -21,25 +21,53 @@
 import web
 import lxml.etree as ET
 from StringIO import StringIO
+from collections import defaultdict
 from copy import deepcopy
 
 import cc.license
 from cc.license.formatters.classes import HTMLFormatter, CC0HTMLFormatter
 
-HTML_FORMATTER_KEYS = {
-    'source-url': 'source_work',
-    'type': 'format',
-    'title': 'attribution_name',
-    'attribution_name': 'attribution_name',
-    'attribution_url' : 'attribution_url',
-    'more_permissions_url': 'more_permissions_url',
-    }
-CC0_FORMATTER_KEYS = {
-    'title': 'work_title',
-    'actor_href': 'actor_href',
-    'work_jurisdiction': 'work_jurisdiction',
-    'name': 'name',
-    }
+""" Mapping of arguments names in work-info elements to the
+key that cc.license requires.
+
+First order precedence for the keys, i.e keys' order is left intact when
+parsing the work-info xml and the value passed to a formatter is based upon
+which key is indexed first.
+
+standard keys: attribution_name, attribution_url, work_title,
+source_work, more_permissions_url, work_title, format
+
+cc0 keys: work_title, name, actor_href, work_jurisdiction
+"""
+    
+HTML_FORMATTER_KEYS = [
+    ('attribution_name', 'attribution_name'),
+    ('creator', 'attribution_name'),
+    ('holder', 'attribution_name'),
+
+    ('attribution_url', 'attribution_url'),
+    ('work-url', 'attribution_url'), 
+
+    ('title', 'work_title'),
+    ('source-url', 'source_work'),
+    ('type', 'format'),
+    ('more_permissions_url', 'more_permissions_url'),
+
+    ]
+
+CC0_FORMATTER_KEYS = [    
+    ('title', 'work_title'),
+
+    ('attribution_name', 'name'),
+    ('creator', 'name'),
+    ('name', 'name'),
+
+    ('attribution_url', 'actor_href'),
+    ('actor_href', 'actor_href'),
+    
+    ('territory', 'work_jurisdiction'),
+
+    ]
     
 def validate_answers(selector, answers):
 
@@ -111,11 +139,18 @@ def build_work_dict(answers):
         formatter_keys = CC0_FORMATTER_KEYS
     else:
         formatter_keys = HTML_FORMATTER_KEYS
-        
-    for item in work_info:
-        if item.tag in formatter_keys.keys():
-            work_dict[ formatter_keys[item.tag] ] = item.text
-        
+    
+    # iterate through the dict in order of key precedence
+    mapping = defaultdict(list)
+    for k,v in formatter_keys:
+        mapping[v].append(k)
+
+    for formatter_key, work_info_keys in mapping.items():
+        for key in work_info_keys: # index work-info in order of key priority
+            if work_info.xpath(key): # key is found, assign value and break loop
+                work_dict[formatter_key] = work_info.xpath(key)[0].text
+                break
+    
     return work_dict
 
 def build_results_tree(license, work_dict=None, locale='en'):
