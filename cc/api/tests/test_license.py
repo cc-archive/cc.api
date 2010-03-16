@@ -157,9 +157,9 @@ class TestLicenseWorkInfo(TestApi):
         'title': 'Testing Title',
         'actor_href': 'http://example.com',
         'name': 'Testing',
-        'work_jurisdiction': 'US',
+        'territory': 'US',
         }
-        
+
     _answers = '<answers><locale>en</locale><license-standard>' + \
               '<commercial>y</commercial>' + \
               '<derivatives>y</derivatives>' + \
@@ -228,12 +228,12 @@ class TestLicenseWorkInfo(TestApi):
     def test_invalid_work_jurisdiction(self):
         """ cc.license will KeyError when an invalid work_jurisidction is passed to
         the CC0 formatter. """
-        res = self.app.get('/license/zero/get?work_jurisdiction=PUKE')
+        res = self.app.get('/license/zero/get?territory=PUKE')
         assert relax_validate(RELAX_ERROR, res.body)
         res = self.app.post('/license/zero/issue',
                             params={'answers': self._cc0_answers % (
-                                    '<work-info><work_jurisdiction>' + \
-                                    'PUKE</work_jurisdiction></work-info>')})
+                                    '<work-info><territory>' + \
+                                    'PUKE</territory></work-info>')})
         assert relax_validate(RELAX_ERROR, res.body)
 
 class TestLicenseGet(TestApi):
