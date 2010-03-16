@@ -31,8 +31,10 @@ from cc.api.handlers import render_as
 class index:
     @render_as('xml')
     def GET(self, selector):
-        
+
         try:
+            if selector == 'software':
+                raise cc.license.CCLicenseError
             lclass = cc.license.selectors.choose(selector)
         except cc.license.CCLicenseError:
             return api_exceptions.invalidclass()
@@ -75,6 +77,8 @@ class issue:
     def POST(self, selector):
 
         try:
+            if selector == 'software':
+                raise cc.license.CCLicenseError
             lclass = cc.license.selectors.choose(selector)
         except cc.license.CCLicenseError:
             return api_exceptions.invalidclass()
@@ -130,6 +134,8 @@ class issue_get:
             locale = 'en'
         
         try:
+            if selector == 'software':
+                raise cc.license.CCLicenseError
             lclass = cc.license.selectors.choose(selector)
         except cc.license.CCLicenseError:
             return api_exceptions.invalidclass()

@@ -144,6 +144,11 @@ class TestLicenseIssue(TestApi):
                                 params={'answers':answers})
         assert relax_validate(RELAX_ERROR, res.body)
 
+    def test_software_failure(self):
+        answers = "<answers><locale>en</locale><license-software /></answers>"
+        res = self.app.post('/license/software/issue', params={'answers':answers})
+        assert relax_validate(RELAX_ERROR, res.body)
+        
 class TestLicenseWorkInfo(TestApi):
 
     _fields = {
@@ -241,6 +246,11 @@ class TestLicenseGet(TestApi):
     def test_invalid_class(self):
         """/get should return an error with an invalid class."""
         res = self.app.get('/license/%s/get' % hash(self))
+        assert relax_validate(RELAX_ERROR, res.body)
+
+    def test_software_is_invalid_class(self):
+        """/get should return an error with an invalid class."""
+        res = self.app.get('/license/software/get')
         assert relax_validate(RELAX_ERROR, res.body)
 
     def test_invalid_answers(self):

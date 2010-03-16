@@ -35,6 +35,8 @@ class index:
 
         root = ET.Element('licenses')
         for selector, lclass in classes.iteritems():
+            if selector == 'software':
+                continue # ignore software license class
             ET.SubElement(root, 'license', dict(id=selector)).text = \
                                 lclass.title(locale)
 
