@@ -117,8 +117,9 @@ def render_as(*types):
                 supported_types.extend([ t for t in h.content_types ])
                 
             except KeyError, e:
+                if web.config.debug: raise e
                 return web.internalerror()
-        
+                
         # use mimeparse to parse the http Accept header string
         # restrict matches to the content types supported
         if http_accept:
@@ -139,14 +140,16 @@ def render_as(*types):
             try:
                 result = fn(*args, **kwargs)
             except Exception, e:
+                if web.config.debug: raise e
                 return web.internalerror()
             
             return handler().response(result)
             
         except TypeError, e:
             # this decorator is only good for results that are serializable
+            if web.config.debug: raise e
             return web.internalerror()
-        
+                        
     return decorator(wrap)
 
 def content_type(content_type, encoding='utf-8'):
