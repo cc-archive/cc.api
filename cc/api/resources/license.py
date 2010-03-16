@@ -100,7 +100,9 @@ class issue:
             return api_exceptions.invalidanswer()
         
         answers_dict = support.build_answers_dict(lclass, answers)
-
+        # issue the answers dict to the cc.license selector
+        license = lclass.by_answers(answers_dict)
+        
         locale = 'en'
         # check if a locale has been passed in answers
         if answers.xpath('/answers/locale'): 
@@ -109,18 +111,12 @@ class issue:
             if locale not in cc.license.locales():
                 locale = 'en' # just fallback, don't throw up
 
-        work_dict = {}
-        # check if work information was included in the answers
-        if answers.xpath('/answers/work-info'):
-            work_info = answers.xpath('/answers/work-info')[0]
-            # returns a dictionary usable by cc.license formatters
-            work_dict = support.build_work_dict(work_info)
-        
-        # issue the answers dict to the cc.license selector
-        license = lclass.by_answers(answers_dict)
-        
+        work_dict = support.build_work_dict(license, answers)
+        work_xml = support.build_work_xml(license, answers)
+                
         try:
-            return support.build_results_tree(license, work_dict, locale)
+            return support.build_results_tree(license, work_xml,
+                                              work_dict, locale)
         except:
             return api_exceptions.pythonerr()
         
@@ -146,12 +142,14 @@ class issue_get:
             return api_exceptions.invalidanswer()
         
         answers_dict = support.build_answers_dict(lclass, answers)
-        work_dict = support.build_work_dict(answers)
-        
         issued_license = lclass.by_answers(answers_dict)
-
+        
+        work_dict = support.build_work_dict(issued_license, answers)
+        work_xml = support.build_work_xml(issued_license, answers)
+        
         try:
-            return support.build_results_tree(issued_license, work_dict, locale)
+            return support.build_results_tree(issued_license, work_xml,
+                                              work_dict, locale)
         except:
             return api_exceptions.pythonerr()
         

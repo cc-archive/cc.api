@@ -18,7 +18,6 @@
 ## FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ## DEALINGS IN THE SOFTWARE.
 
-import web
 import lxml.etree as ET
 from StringIO import StringIO
 from collections import defaultdict
@@ -126,19 +125,19 @@ def build_answers_xml(selector, args):
 
     return answers
     
-def build_work_dict(answers):
+def build_work_dict(license, answers=None):
 
     work_dict = {}
     
-    if not answers.xpath('/answers/work-info') or \
+    if answers is None or \
+           not answers.xpath('/answers/work-info') or \
            len(answers.xpath('/answers/work-info')[0]) == 0:
         return work_dict
     
     work_info = answers.xpath('/answers/work-info')[0]
-    if answers.xpath('/answers/license-zero'):
-        formatter_keys = CC0_FORMATTER_KEYS
-    else:
-        formatter_keys = HTML_FORMATTER_KEYS
+
+    formatter_keys = (license.license_class == 'zero' and \
+                      CC0_FORMATTER_KEYS or HTML_FORMATTER_KEYS)
     
     # iterate through the dict in order of key precedence
     mapping = defaultdict(list)
@@ -153,7 +152,62 @@ def build_work_dict(answers):
     
     return work_dict
 
-def build_results_tree(license, work_dict=None, locale='en'):
+def build_work_xml(license, answers=None):
+
+    RDF = lambda p: '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}%s' % p
+    DC = lambda p: '{http://purl.org/dc/elements/1.1/}%s' % p
+    work_types = ['Text', 'StillImage', 'MovingImage', 'InteractiveResource',
+                  'Sound', ]
+    
+    root = ET.Element('Work', {RDF('about') : ''},
+                      {'dc':'http://purl.org/dc/elements/1.1/'})
+
+    if answers is None or \
+           not answers.xpath('/answers/work-info') or \
+           len(answers.xpath('/answers/work-info')[0]) == 0:
+        # add the license element and return
+        ET.SubElement(root, 'license', { RDF('resource') : license.uri })
+        return root
+
+    work_info = answers.xpath('/answers/work-info')[0]
+    
+    # <work-url>
+    if work_info.xpath('work-url'):
+        root.attrib[ RDF('about') ] = work_info.xpath('work-url')[0].text
+    # <title>
+    if work_info.xpath('title'):
+        ET.SubElement(root, DC('title')).text = work_info.xpath('title')[0].text
+    # <type>
+    if work_info.xpath('type') and \
+       work_info.xpath('type')[0].text in work_types:
+        ET.SubElement(root, DC('type')).text = \
+                            'http://purl.org/dc/dcmitype/' + \
+                            work_info.xpath('type')[0].text
+    # <year>
+    if work_info.xpath('year'):
+        ET.SubElement(root, DC('date')).text = work_info.xpath('year')[0].text
+    # <description>
+    if work_info.xpath('description'):
+        ET.SubElement(root, DC('description')).text = \
+                            work_info.xpath('description')[0].text
+    # <creator>
+    if work_info.xpath('creator'):
+        creator = ET.SubElement(root, DC('creator'))
+        ET.SubElement(creator, 'Agent').text = work_info.xpath('creator')[0].text
+    # <holder>
+    if work_info.xpath('holder'):
+        holder = ET.SubElement(root, DC('rights'))
+        ET.SubElement(holder, 'Agent').text = work_info.xpath('holder')[0].text
+    # <source-url>
+    if work_info.xpath('source-url'):
+        ET.SubElement(root, DC('source')).text = \
+                            work_info.xpath('source-url')[0].text
+        
+    ET.SubElement(root, 'license', { RDF('resource') : license.uri })
+
+    return root
+                 
+def build_results_tree(license, work_xml=None, work_dict=None, locale='en'):
 
     root = ET.Element('result')
     # add the license uri and name
@@ -165,10 +219,9 @@ def build_results_tree(license, work_dict=None, locale='en'):
     
     # prepare the RDFa for xml parsing
     try:
-        if license.license_code == 'CC0':
-            rdfa = CC0HTMLFormatter().format(license, work_dict, locale)
-        else:
-            rdfa = HTMLFormatter().format(license, work_dict, locale)
+        formatter = (license.license_class == 'zero' and \
+                     CC0HTMLFormatter or HTMLFormatter)
+        rdfa = formatter().format(license, work_dict, locale)
     except Exception,e:
         # cc.license formatter choked on something
         # such an example would be an invalid work_jurisdiction value passed
@@ -176,17 +229,15 @@ def build_results_tree(license, work_dict=None, locale='en'):
         raise e
     
     license_rdfa = ET.parse(StringIO('<p>%s</p>' % rdfa))
-
-    # build a Work tree
-    rdfns = lambda x: '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}%s'%x
-    work = ET.Element('Work', { rdfns('about') : '' })
-    ET.SubElement(work, 'license', { rdfns('resource') : license.uri })
-    license_rdf.getroot().insert(0, work)
     
     # add RDF trees to the results
     ET.SubElement(root, 'rdf').append(license_rdf.getroot())
-    license_rdf = deepcopy(license_rdf)
-    ET.SubElement(root,'licenserdf').append(license_rdf.getroot())
+    copy_of_license_rdf = deepcopy(license_rdf)
+    ET.SubElement(root,'licenserdf').append(copy_of_license_rdf.getroot())
+
+    # append the work tree to the rdf result
+    if work_xml is None: work_xml = build_work_xml(license)
+    license_rdf.getroot().insert(0, work_xml)
 
     # the html tree has a spurious element at its root that was
     # required for the RDFa to parse, so only append the children
