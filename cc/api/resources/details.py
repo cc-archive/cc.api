@@ -27,7 +27,7 @@ from cc.api.handlers import render_as
 
 class index:
     
-    @render_as('xml', 'html')
+    @render_as('xml')
     def GET(self):
         """ Accepts a license uri as an argument and will return
         the RDF and RDFa of a licnsee """
@@ -40,7 +40,7 @@ class index:
             l = cc.license.by_uri(str(license_uri))
         except cc.license.CCLicenseError:
             return api_exceptions.invaliduri()
-
+        
         return support.build_results_tree(l)
 
     def POST(self):
