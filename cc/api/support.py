@@ -192,12 +192,12 @@ def build_work_xml(license, answers=None):
                             work_info.xpath('description')[0].text
     # <creator>
     if work_info.xpath('creator'):
-        creator = ET.SubElement(root, DC('creator'))
-        ET.SubElement(creator, 'Agent').text = work_info.xpath('creator')[0].text
+        ET.SubElement(root, DC('creator')).text = \
+                            work_info.xpath('creator')[0].text
     # <holder>
     if work_info.xpath('holder'):
-        holder = ET.SubElement(root, DC('rights'))
-        ET.SubElement(holder, 'Agent').text = work_info.xpath('holder')[0].text
+        ET.SubElement(root, DC('rights')).text = \
+                            work_info.xpath('holder')[0].text
     # <source-url>
     if work_info.xpath('source-url'):
         ET.SubElement(root, DC('source')).text = \
