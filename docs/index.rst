@@ -2,7 +2,7 @@
 api.creativecommons.org
 =======================
 
-:Author: Nathan R. Yergler
+:Author: Nathan R. Yergler, John E. Doig III
 :Updated: $Date: 2009-04-02 10:57:29 -0700 (Thu, 02 Apr 2009) $
 
 Creative Commons provides web service APIs which can be used to integrate 
@@ -16,6 +16,7 @@ The following versions are available:
    1.0 <readme_10>
    1.5 <readme_15>
    Development <readme_dev>
+   Staging <readme_staging>
 
 The current in-development API is described in the 
 :doc:`development version documentation <readme_dev>`.  These APIs are currently in beta, and we are soliciting 
@@ -41,7 +42,6 @@ software@creativecommons.org.
 
 Revision History
 ~~~~~~~~~~~~~~~~~
-
  * 2 April 2009: Converted to Sphinx.
  * 19 July 2007: Updated links.
  * 30 August 2005: 1.5 (:doc:`documentation <readme_15>`)
