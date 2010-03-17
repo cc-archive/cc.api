@@ -28,8 +28,8 @@ requires = [
     'lxml',
     'web.py',
     'nose',
-    'cc.i18npkg==0.2',
-    'cc.license==0.11.10',
+    'cc.i18npkg',
+    'cc.license',
     'WebTest',
     ]
 
