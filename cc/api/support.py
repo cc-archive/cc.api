@@ -24,7 +24,7 @@ from collections import defaultdict
 from copy import deepcopy
 
 import cc.license
-from cc.license.formatters.classes import HTMLFormatter, CC0HTMLFormatter
+from cc.license.formatters.classes import *
 
 """ Mapping of arguments names in work-info elements to the
 key that cc.license requires.
@@ -38,7 +38,14 @@ source_work, more_permissions_url, work_title, format
 
 cc0 keys: work_title, name, actor_href, work_jurisdiction
 """
-    
+
+FORMATTERS = {
+    'zero': CC0HTMLFormatter,
+    'standard': HTMLFormatter,
+    'recombo': HTMLFormatter,
+    'publicdomain': PublicDomainHTMLFormatter,
+    }
+
 HTML_FORMATTER_KEYS = [
     ('attribution_name', 'attribution_name'),
     ('creator', 'attribution_name'),
@@ -219,10 +226,9 @@ def build_results_tree(license, work_xml=None, work_dict=None, locale='en'):
     
     # prepare the RDFa for xml parsing
     try:
-        formatter = (license.license_class == 'zero' and \
-                     CC0HTMLFormatter or HTMLFormatter)
+        formatter = FORMATTERS.get(license.license_class, HTMLFormatter)
         rdfa = formatter().format(license, work_dict, locale)
-    except Exception,e:
+    except Exception, e:
         # cc.license formatter choked on something
         # such an example would be an invalid work_jurisdiction value passed
         # to the CC0 formatter
