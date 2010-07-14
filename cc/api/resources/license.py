@@ -33,10 +33,9 @@ class index:
     def GET(self, selector):
 
         try:
-            if selector == 'software':
-                raise cc.license.CCLicenseError
+            assert selector != 'software'
             lclass = cc.license.selectors.choose(selector)
-        except cc.license.CCLicenseError:
+        except:
             return api_exceptions.invalidclass()
 
         locale = web.input().get('locale', 'en')
@@ -77,10 +76,9 @@ class issue:
     def POST(self, selector):
 
         try:
-            if selector == 'software':
-                raise cc.license.CCLicenseError
+            assert selector != 'software'
             lclass = cc.license.selectors.choose(selector)
-        except cc.license.CCLicenseError:
+        except:
             return api_exceptions.invalidclass()
 
         if not web.input().get('answers'):
@@ -134,10 +132,9 @@ class issue_get:
             locale = 'en'
         
         try:
-            if selector == 'software':
-                raise cc.license.CCLicenseError
+            assert selector != 'software'
             lclass = cc.license.selectors.choose(selector)
-        except cc.license.CCLicenseError:
+        except:
             return api_exceptions.invalidclass()
 
         answers = support.build_answers_xml(lclass, args)
@@ -148,8 +145,9 @@ class issue_get:
             return api_exceptions.invalidanswer()
         
         answers_dict = support.build_answers_dict(lclass, answers)
+
         issued_license = lclass.by_answers(answers_dict)
-        
+
         work_dict = support.build_work_dict(issued_license, answers)
         work_xml = support.build_work_xml(issued_license, answers)
         
@@ -158,4 +156,40 @@ class issue_get:
                                               work_dict, locale)
         except:
             return api_exceptions.pythonerr()
+
+class jurisdiction:
+
+    @render_as('xml')
+    def GET(self, jid):
         
+        locale = web.input().get('locale', 'en')
+
+        # return non-newest versions?
+        current_only = web.input().get('current', '1')
+        current_only = bool(int(current_only))
+        
+        try:
+            j = cc.license.jurisdictions.by_code(str(jid))
+            if not j.launched:
+                raise cc.license.CCLicenseError
+        except cc.license.CCLicenseError:
+            return api_exceptions.invalidjurisdiction()
+
+        juri = ET.Element('jurisdiction', dict(name=j.title(str(locale)),
+                                               url=j.id))
+
+        licenses = cc.license.jurisdictions.get_licenses_by_code(str(jid))
+
+        if current_only:
+            current_version = cc.license._lib.functions.current_version('by', str(jid))
+        
+        for l in licenses:
+            license = cc.license.by_uri(l)
+            
+            if current_only and license.version != current_version:
+                continue
+
+            ET.SubElement(juri, 'license', dict(name=license.title(str(locale)),
+                                                    url=l))
+        
+        return juri

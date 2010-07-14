@@ -11,6 +11,7 @@ from cc.api.tests.test_common import *
 RELAX_ERROR = os.path.join(RELAX_PATH, 'error.relax.xml')
 RELAX_LICENSECLASS = os.path.join(RELAX_PATH, 'licenseclass.relax.xml')
 RELAX_ISSUE = os.path.join(RELAX_PATH, 'issue.relax.xml')
+RELAX_JURISDICTION = os.path.join(RELAX_PATH, 'jurisdiction.relax.xml')
 
 ##################
 ## Test classes ##
@@ -271,9 +272,6 @@ class TestLicenseGet(TestApi):
         for query_string in self.data.query_string_answers(lclass):
             res = self.app.get('/license/%s/get%s' %
                                      (lclass, query_string))
-            print 'lclass: %s' % lclass
-            print 'query_string: %s' % query_string
-            print
             assert relax_validate(RELAX_ISSUE, res.body)
 
     def test_license_standard(self):
@@ -291,3 +289,26 @@ class TestLicenseGet(TestApi):
     def test_license_zero(self):
         """/get issues recombo licenses successfully."""
         self._get('zero')
+
+class TestLicenseJurisdiction(TestApi):
+
+    def test_invalid_jurisdiction(self):
+        """ should return error for an invalid juri code """
+        res = self.app.get('/license/standard/jurisdiction/xx')
+        assert relax_validate(RELAX_ERROR, res.body)
+
+    def test_get_jurisdiction(self):
+        """ license/standard/jurisdiction/<juri code> lists most current
+        license versions ported to the jurisdiction """
+        for j in self.data.jurisdictions():
+            res = self.app.get('/license/standard/jurisdiction/%s' % j)
+            assert relax_validate(RELAX_JURISDICTION, res.body)
+
+    def test_get_jurisdiction_past_versions(self):
+        """ allow for non-current licenses to be returned when the
+        current query param is set to 0 """
+        # 'es' jurisdiction has more than one version in its history
+        past = self.app.get('/license/standard/jurisdiction/es?current=0')
+        assert relax_validate(RELAX_JURISDICTION, past.body)
+        current = self.app.get('/license/standard/jurisdiction/es')
+        assert len(past.body) > len(current.body)

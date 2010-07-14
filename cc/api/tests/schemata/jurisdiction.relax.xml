@@ -1,0 +1,10 @@
+<element name="jurisdiction" xmlns="http://relaxng.org/ns/structure/1.0">
+  <attribute name="url" />
+  <attribute name="name" />
+  <oneOrMore>
+    <element name="license">
+      <attribute name="url" />
+      <attribute name="name" />
+    </element>
+  </oneOrMore>
+</element>

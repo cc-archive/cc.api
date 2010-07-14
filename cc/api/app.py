@@ -31,6 +31,7 @@ urls = ( # tuple of url to resource method mappings
     '/license/([\w\d]+)',       'cc.api.resources.license.index',
     '/license/([\w\d]+)/issue', 'cc.api.resources.license.issue',
     '/license/([\w\d]+)/get',   'cc.api.resources.license.issue_get',
+    '/license/standard/jurisdiction/([\w]+)', 'cc.api.resources.license.jurisdiction',
     
     '/simple/chooser',        'cc.api.resources.simple.chooser',
     '/simple/chooser.js',     'cc.api.resources.simple.chooser_js',

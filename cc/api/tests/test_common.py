@@ -90,6 +90,24 @@ class TestData:
             enums.append(('derivatives', ['y', 'sa', 'n']))
             return enums
 
+    def jurisdictions(self, canned=True):
+        """Return a list of valid jurisdictions.
+        Can return canned data, or the list of jurisdictions that
+        /support/jurisdictions returns."""
+        juris = None
+        if canned:
+            juris = [
+                        'us', # United States
+                        'es', # Spain
+                        'uk', # United Kingdom
+                        'scotland', # Duh
+                      ]
+        else:
+            res = app.get('/support/jurisdictions')
+            juris_doc = lxml.etree.parse(StringIO(res.body))
+            juris = [j for j in juris_doc.xpath('//option/@id')]
+        return juris        
+    
     def locales(self, canned=True):
         """Return a list of supported locales.
         Can return canned data, or the list of locales that
