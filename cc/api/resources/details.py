@@ -31,8 +31,9 @@ class index:
     def GET(self):
         """ Accepts a license uri as an argument and will return
         the RDF and RDFa of a licnsee """
-
+        locale = web.input().get('locale', 'en')
         license_uri = web.input().get('license-uri')
+        
         if not license_uri:
             return api_exceptions.missingparam('license-uri')
 
@@ -41,7 +42,7 @@ class index:
         except cc.license.CCLicenseError:
             return api_exceptions.invaliduri()
         
-        return support.build_results_tree(l)
+        return support.build_results_tree(l, locale=locale)
 
     def POST(self):
         return self.GET()
