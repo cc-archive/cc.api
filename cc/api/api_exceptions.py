@@ -29,6 +29,9 @@ def _error_tree(error_id, message):
 def invalidclass():
     return _error_tree('invalidclass', 'Invalid License Class.')
 
+def invalidjurisdiction():
+    return _error_tree('invalidjurisdiction', 'Invalid License Jurisdiction.')
+
 def invaliduri():
     return _error_tree('invaliduri', 'Invalid license uri.')
 

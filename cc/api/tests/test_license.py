@@ -312,3 +312,11 @@ class TestLicenseJurisdiction(TestApi):
         assert relax_validate(RELAX_JURISDICTION, past.body)
         current = self.app.get('/license/standard/jurisdiction/es')
         assert len(past.body) > len(current.body)
+
+    def test_get_unported(self):
+        """ license/standard/jurisdiction/ should return latest unported """
+        res = self.app.get('/license/standard/jurisdiction/')
+        assert relax_validate(RELAX_JURISDICTION, res.body)
+        assert 'Unported' in res.body
+    
+    

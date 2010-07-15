@@ -160,7 +160,7 @@ class issue_get:
 class jurisdiction:
 
     @render_as('xml')
-    def GET(self, jid):
+    def GET(self, jid=''):
         
         locale = web.input().get('locale', 'en')
 
@@ -181,7 +181,8 @@ class jurisdiction:
         licenses = cc.license.jurisdictions.get_licenses_by_code(str(jid))
 
         if current_only:
-            current_version = cc.license._lib.functions.current_version('by', str(jid))
+            current_version = cc.license._lib.functions.current_version('by',
+                                                                        str(jid))
         
         for l in licenses:
             license = cc.license.by_uri(l)
