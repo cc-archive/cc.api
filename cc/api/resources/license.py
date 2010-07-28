@@ -176,7 +176,8 @@ class jurisdiction:
             return api_exceptions.invalidjurisdiction()
 
         juri = ET.Element('jurisdiction', dict(name=j.title(str(locale)),
-                                               url=j.id))
+                                               url=j.id,
+                                               local_url=j.local_url))
 
         licenses = cc.license.jurisdictions.get_licenses_by_code(str(jid))
 

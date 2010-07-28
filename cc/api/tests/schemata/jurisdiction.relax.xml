@@ -1,6 +1,7 @@
 <element name="jurisdiction" xmlns="http://relaxng.org/ns/structure/1.0">
   <attribute name="url" />
   <attribute name="name" />
+  <attribute name="local_url" />
   <oneOrMore>
     <element name="license">
       <attribute name="url" />
