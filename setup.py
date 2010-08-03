@@ -28,7 +28,6 @@ requires = [
     'lxml',
     'web.py',
     'nose',
-    'cc.i18npkg',
     'cc.license',
     'WebTest',
     ]
