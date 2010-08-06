@@ -170,6 +170,7 @@ class jurisdiction:
         
         try:
             j = cc.license.jurisdictions.by_code(str(jid))
+            
             if not j.launched:
                 raise cc.license.CCLicenseError
         except cc.license.CCLicenseError:
@@ -177,7 +178,7 @@ class jurisdiction:
 
         juri = ET.Element('jurisdiction', dict(name=j.title(str(locale)),
                                                url=j.id,
-                                               local_url=j.local_url))
+                                               local_url=(j.local_url or '')))
 
         licenses = cc.license.jurisdictions.get_licenses_by_code(str(jid))
 
