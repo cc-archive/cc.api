@@ -322,6 +322,9 @@ License return format
       <message>Invalid license uri.</message>
     </error>
 
+  If your application requires more information about a license, the full
+  RDF is available by appending /rdf to the end of any valid Creative Commons
+  License URI. e.g. http://creativecommons.org/licenses/by/3.0/us/rdf
 
 /simple/chooser
 ~~~~~~~~~~~~~~~
