@@ -28,11 +28,11 @@ from cc.api.handlers import render_as
 class index:
     
     @render_as('xml')
-    def GET(self):
+    def GET(self, locale=None, license_uri=None):
         """ Accepts a license uri as an argument and will return
         the RDF and RDFa of a licnsee """
-        locale = web.input().get('locale', 'en')
-        license_uri = web.input().get('license-uri')
+        locale = locale or web.input().get('locale', 'en')
+        license_uri = license_uri or web.input().get('license-uri')
         
         if not license_uri:
             return api_exceptions.missingparam('license-uri')
@@ -45,4 +45,5 @@ class index:
         return support.build_results_tree(l, locale=locale)
 
     def POST(self):
-        return self.GET()
+        return self.GET(web.input().get('locale'),
+                        web.input().get('license-uri'))
