@@ -220,7 +220,9 @@ def build_results_tree(license, work_xml=None, work_dict=None, locale='en'):
     # add the license uri and name
     ET.SubElement(root, 'license-uri').text = license.uri
     ET.SubElement(root, 'license-name').text = license.title(locale)
-
+    ET.SubElement(root, 'deprecated').text = \
+                        (license.deprecated and u'true' or u'false')
+    
     # parse the RDF and RDFa from cc.license
     license_rdf = ET.parse( StringIO(license.rdf) )
     

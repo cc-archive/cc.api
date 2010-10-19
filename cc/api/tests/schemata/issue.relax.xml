@@ -8,6 +8,12 @@
         <element name="license-name">
           <text/>
         </element>
+        <element name="deprecated">
+          <choice>
+              <value>true</value>
+              <value>false</value>
+          </choice>
+        </element>
         <element name="rdf">
           <ref name="d1_RDF"/>
         </element>
