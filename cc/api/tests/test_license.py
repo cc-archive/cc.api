@@ -130,6 +130,10 @@ class TestLicenseIssue(TestApi):
         """/issue issues publicdomain licenses successfully."""
         self._issue('publicdomain')
 
+    def test_license_mark(self):
+        """/issue issues pdm successfully."""
+        self._issue('mark')
+
     def test_license_zero(self):
         """/issue issues zero licenses successfully."""
         self._issue('zero')

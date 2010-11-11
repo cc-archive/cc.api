@@ -79,8 +79,8 @@ class TestData:
         """Retrieve the license information for this class, and generate 
            a set of answers for use with testing."""
         enums = [('jurisdiction', ['', 'us', 'de', 'uk'])]
-        if lclass in ['publicdomain', 'zero']:
-            return enums
+        if lclass in ['publicdomain', 'zero', 'mark']:
+            return enums            
         elif lclass == 'recombo':
             enums.append(('sampling',
                           ['sampling','samplingplus','ncsamplingplus']))

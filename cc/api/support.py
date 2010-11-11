@@ -43,6 +43,7 @@ FORMATTERS = {
     'zero': CC0HTMLFormatter,
     'standard': HTMLFormatter,
     'recombo': HTMLFormatter,
+    'mark': PDMarkHTMLFormatter,
     'publicdomain': PublicDomainHTMLFormatter,
     }
 

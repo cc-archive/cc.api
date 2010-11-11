@@ -34,6 +34,7 @@ class index:
 
         try:
             assert selector != 'software'
+            if selector == 'publicdomain': selector = 'zero'
             lclass = cc.license.selectors.choose(selector)
         except:
             return api_exceptions.invalidclass()
@@ -77,7 +78,10 @@ class issue:
 
         try:
             assert selector != 'software'
-            lclass = cc.license.selectors.choose(selector)
+            if selector == 'publicdomain':
+                lclass = cc.license.selectors.choose('zero')
+            else:
+                lclass = cc.license.selectors.choose(selector)
         except:
             return api_exceptions.invalidclass()
 
@@ -85,8 +89,16 @@ class issue:
             return api_exceptions.missingparam('answers')
 
         try:
+            answers_xml = web.input().get('answers')
+            if selector == 'publicdomain':
+                answers_xml = answers_xml.replace(
+                    '<license-publicdomain>',
+                    '<license-zero>').replace(
+                    '</license-publicdomain>',
+                    '</license-zero>')
+            
             # parse the answers argument into an xml tree
-            answers = ET.parse(StringIO(web.input().get('answers')))
+            answers = ET.parse(StringIO(answers_xml))
             
         except ET.XMLSyntaxError, e:
             return api_exceptions.invalidanswer()
@@ -133,6 +145,7 @@ class issue_get:
         
         try:
             assert selector != 'software'
+            if selector == 'publicdomain': selector = 'zero'
             lclass = cc.license.selectors.choose(selector)
         except:
             return api_exceptions.invalidclass()
@@ -145,9 +158,9 @@ class issue_get:
             return api_exceptions.invalidanswer()
         
         answers_dict = support.build_answers_dict(lclass, answers)
-
+        
         issued_license = lclass.by_answers(answers_dict)
-
+        
         work_dict = support.build_work_dict(issued_license, answers)
         work_xml = support.build_work_xml(issued_license, answers)
         

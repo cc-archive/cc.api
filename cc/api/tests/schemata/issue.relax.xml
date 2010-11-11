@@ -24,6 +24,7 @@
             <choice> 
               <ref name="standard" />
               <ref name="zero" />
+              <ref name="mark" />
             </choice>
         </element>
       </group>
@@ -128,6 +129,32 @@
                   
               </element>
             </define>
+
+           <define name="mark">
+              <element name="p">
+                  
+                <ref name="badge_html" />
+
+                <element name="br">
+                  <empty/>
+                </element>
+
+                <text />
+                <optional>
+                <element name="span">
+                  <attribute name="rel">
+                    <text />
+                  </attribute>
+                  <attribute name="resource">
+                    <text />
+                  </attribute>
+                  <text />
+                </element>
+                </optional>
+                <text />
+                  
+              </element>
+           </define>
 
 
 
