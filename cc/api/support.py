@@ -43,6 +43,7 @@ FORMATTERS = {
     'zero': CC0HTMLFormatter,
     'standard': HTMLFormatter,
     'recombo': HTMLFormatter,
+    'mark': PDMarkHTMLFormatter,
     'publicdomain': PublicDomainHTMLFormatter,
     }
 
@@ -76,7 +77,13 @@ CC0_FORMATTER_KEYS = [
     ]
     
 def validate_answers(selector, answers):
-
+    """ Takes an xml string `answers` and ensures that
+    all of the required questions have values for the given
+    selector class. Valid answers must be a member of the
+    enumeration for that question, if not, then this function
+    with throw an exception, signalling to the caller that the
+    answers string is not a valid one. """
+    
     assert answers.xpath('/answers/license-%s' % selector.id), \
            'license-class required'
     
@@ -101,7 +108,8 @@ def validate_answers(selector, answers):
     return True
 
 def build_answers_dict(selector, answers):
-    # builds answer dict thats usable in cc.license
+    """ cc.license uses a dict form of the answers xml.
+    This function converts the xml string `answers` into a python dict. """
     
     answers_dict = {}      
     questions = answers.xpath('/answers/license-%s' % selector.id)[0]
@@ -112,6 +120,11 @@ def build_answers_dict(selector, answers):
     return answers_dict
 
 def build_answers_xml(selector, args):
+    """ builds an answers xml string for a selector class using
+    default answers for the selector's questions. If any other attributes
+    were included in the call, they are appended to as part of the
+    work-info. """
+    
     # build an answers xml tree
     answers = ET.Element('answers')
     questions = ET.SubElement(answers, 'license-%s' % selector.id)
@@ -133,7 +146,10 @@ def build_answers_xml(selector, args):
     return answers
     
 def build_work_dict(license, answers=None):
-
+    """ Extract work-info elements from the `answers` ElementTree
+    and constructs a dict so that it may be passed to a cc.license
+    formatter. """
+    
     work_dict = {}
     
     if answers is None or \
@@ -160,7 +176,10 @@ def build_work_dict(license, answers=None):
     return work_dict
 
 def build_work_xml(license, answers=None):
-
+    """ Accept the work-information parameters defined in the api doc's
+    and build an RDF-XML tree containing accurate predicates for the
+    paremeters contained in the answers xml. """
+    
     RDF = lambda p: '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}%s' % p
     DC = lambda p: '{http://purl.org/dc/elements/1.1/}%s' % p
     work_types = ['Text', 'StillImage', 'MovingImage', 'InteractiveResource',
@@ -215,12 +234,17 @@ def build_work_xml(license, answers=None):
     return root
                  
 def build_results_tree(license, work_xml=None, work_dict=None, locale='en'):
-
+    """ Build an ElementTree to be returned for an issue or details call.
+    Properly wraps the formatter markup of a license as a valid xhtml tree.
+    """    
+    
     root = ET.Element('result')
     # add the license uri and name
     ET.SubElement(root, 'license-uri').text = license.uri
     ET.SubElement(root, 'license-name').text = license.title(locale)
-
+    ET.SubElement(root, 'deprecated').text = \
+                        (license.deprecated and u'true' or u'false')
+    
     # parse the RDF and RDFa from cc.license
     license_rdf = ET.parse( StringIO(license.rdf) )
     

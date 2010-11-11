@@ -278,6 +278,7 @@ License return format
     <result>
      <license-uri>http://creativecommons.org/licenses/by/3.0/us/</license-uri>
      <license-name>Attribution 3.0 United States</license-name>
+     <deprecated>false</deprecated>
      <rdf>
        <rdf:RDF xmlns="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
         <Work rdf:about="">

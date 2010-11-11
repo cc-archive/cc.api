@@ -118,9 +118,6 @@ class TestLicenseIssue(TestApi):
     def _issue(self, lclass):
         """Common /issue testing code."""
         for answers in self.data.xml_answers(lclass):
-            print 'lclass: %s' % lclass
-            print 'answers: %s' % answers
-            print
             res = self.app.post('/license/%s/issue' % lclass,
                                      params={'answers':answers})
             assert relax_validate(RELAX_ISSUE, res.body)
@@ -132,6 +129,10 @@ class TestLicenseIssue(TestApi):
     def test_license_publicdomain(self):
         """/issue issues publicdomain licenses successfully."""
         self._issue('publicdomain')
+
+    def test_license_mark(self):
+        """/issue issues pdm successfully."""
+        self._issue('mark')
 
     def test_license_zero(self):
         """/issue issues zero licenses successfully."""
@@ -167,7 +168,21 @@ class TestLicenseIssue(TestApi):
         answers = "<answers><locale>en</locale><license-software /></answers>"
         res = self.app.post('/license/software/issue', params={'answers':answers})
         assert relax_validate(RELAX_ERROR, res.body)
-        
+
+    def test_deprecated_license_issue(self):
+        """ Results should include information regarding the deprecation
+        status of a license. """
+
+        answers = "<answers><license-recombo><jurisdiction/><sampling>sampling</sampling></license-recombo></answers>"
+        res = self.app.post('/license/recombo/issue', params={'answers':answers})
+        print res.body
+        assert "<deprecated>true</deprecated>" in res.body
+
+        answers = "<answers><license-standard><commercial>y</commercial><derivatives>y</derivatives><jurisdiction /></license-standard></answers>"
+        res = self.app.post('/license/standard/issue', params={'answers':answers})
+        print res.body
+        assert "<deprecated>false</deprecated>" in res.body
+
 class TestLicenseWorkInfo(TestApi):
 
     _fields = {
