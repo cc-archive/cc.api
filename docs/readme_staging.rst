@@ -51,19 +51,19 @@ Valid Calls
   (synonym for /classes)
 
   Returns an XML document describing the available license classes.  A license class
-  is a "family" of licenses.  Current classes are standard (basic CC licenses), 
-  publicdomain, and recombo (the Sampling licenses).  
+  is a "family" of licenses.  Current classes are standard (basic CC licenses), recombo (the Sampling licenses), zero (the CC0 waiver), mark (the Public Domain Mark), and publicdomain (now deprecated, aliased to the zero class).  
   Classes may be added at any time in the future without
   breaking 1.0 compatibility.
 
   A partial example of the returned document is::
   
-     <licenses>
-         <license id="recombo">Sampling</license>
-         <license id="zero">zero</license>
-         <license id="publicdomain">Public Domain</license>
-         <license id="standard">Creative Commons</license>
-     </licenses>
+     <licenses> 
+         <license id="publicdomain">Public Domain</license> 
+         <license id="standard">Creative Commons</license> 
+         <license id="recombo">Sampling</license> 
+         <license id="zero">CC0</license> 
+         <license id="mark">Public Domain Mark</license> 
+     </licenses> 
 
   If a value for locale is supplied, the service will attempt to return
   localized class descriptions.  If not specified, English will
