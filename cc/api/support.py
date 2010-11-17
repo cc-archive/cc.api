@@ -47,35 +47,40 @@ FORMATTERS = {
     'publicdomain': PublicDomainHTMLFormatter,
     }
 
-HTML_FORMATTER_KEYS = [
-    ('attribution_name', 'attribution_name'),
-    ('creator', 'attribution_name'),
-    ('holder', 'attribution_name'),
+FORMATTER_KEYS = {
+    'standard': [
+        ('attribution_name', 'attribution_name'),
+        ('creator', 'attribution_name'),
+        ('holder', 'attribution_name'),
+        ('attribution_url', 'attribution_url'),
+        ('work-url', 'attribution_url'), 
+        ('title', 'work_title'),
+        ('source-url', 'source_work'),
+        ('type', 'format'),
+        ('more_permissions_url', 'more_permissions_url'),
+        ],
+    'zero': [
+        ('title', 'work_title'),
+        ('attribution_name', 'name'),
+        ('creator', 'name'),
+        ('name', 'name'),
+        ('attribution_url', 'actor_href'),
+        ('actor_href', 'actor_href'),
+        ('territory', 'work_jurisdiction'),
+        ],
+    'mark': [
+        ('title', 'work_title'),
+        ('attribution_name', 'author_title'),
+        ('name', 'author_title'),
+        ('author_title', 'author_title'),
+        ('attribution_url', 'author_href'),
+        ('author_url', 'author_href'),
+        ('curator_title', 'curator_title'),
+        ('curator_url', 'curator_href'),
+        ('waive_rights','waive_cc0'),
+        ],
+    }
 
-    ('attribution_url', 'attribution_url'),
-    ('work-url', 'attribution_url'), 
-
-    ('title', 'work_title'),
-    ('source-url', 'source_work'),
-    ('type', 'format'),
-    ('more_permissions_url', 'more_permissions_url'),
-
-    ]
-
-CC0_FORMATTER_KEYS = [    
-    ('title', 'work_title'),
-
-    ('attribution_name', 'name'),
-    ('creator', 'name'),
-    ('name', 'name'),
-
-    ('attribution_url', 'actor_href'),
-    ('actor_href', 'actor_href'),
-    
-    ('territory', 'work_jurisdiction'),
-
-    ]
-    
 def validate_answers(selector, answers):
     """ Takes an xml string `answers` and ensures that
     all of the required questions have values for the given
@@ -159,9 +164,9 @@ def build_work_dict(license, answers=None):
     
     work_info = answers.xpath('/answers/work-info')[0]
 
-    formatter_keys = (license.license_class == 'zero' and \
-                      CC0_FORMATTER_KEYS or HTML_FORMATTER_KEYS)
-    
+    formatter_keys = FORMATTER_KEYS.get(license.license_class,
+                                        FORMATTER_KEYS['standard'])
+
     # iterate through the dict in order of key precedence
     mapping = defaultdict(list)
     for k,v in formatter_keys:

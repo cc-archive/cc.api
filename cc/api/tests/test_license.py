@@ -198,7 +198,15 @@ class TestLicenseWorkInfo(TestApi):
         'name': 'Testing',
         'territory': 'US',
         }
-
+    _mark_fields = {
+        'title': 'Testing Title',
+        'curator_title': 'Curator',
+        'curator_url': 'http://curator.com/',
+        'author_title': 'Author',
+        'author_url': 'http://author.com/',
+        'waive_rights': '1',
+        }
+    
     _answers = '<answers><locale>en</locale><license-standard>' + \
               '<commercial>y</commercial>' + \
               '<derivatives>y</derivatives>' + \
@@ -206,6 +214,7 @@ class TestLicenseWorkInfo(TestApi):
               '</license-standard>%s</answers>'
     
     _cc0_answers = '<answers><license-zero />%s</answers>'
+    _mark_answers = '<answers><license-mark />%s</answers>'
     
     def _work_info_string(self, fields):
         root = "<work-info>"
@@ -261,6 +270,23 @@ class TestLicenseWorkInfo(TestApi):
                 # assert field is present in get response
                 assert self._cc0_fields[f] in g.body, '%s=%s not in get results.' % \
                        (f, self._cc0_fields[f])
+                # issue and get should be identical
+                assert i.body == g.body
+
+        work_infos = self._permute_workinfo(self._mark_fields.keys(), self._mark_fields)
+        for workinfo in work_infos:
+            wi = self._work_info_string(
+                dict([ (f, self._mark_fields[f]) for f in workinfo ]))
+            i = self.app.post('/license/mark/issue',
+                              params={'answers':self._mark_answers % wi})
+            g = self.app.get('/license/mark/get?' + urlencode(workinfo))
+            for f in workinfo:
+                # assert field is present in issue response
+                assert self._mark_fields[f] in i.body, '%s=%s not in issue results.'% \
+                       (f, self._mark_fields[f])
+                # assert field is present in get response
+                assert self._mark_fields[f] in g.body, '%s=%s not in get results.' % \
+                       (f, self._mark_fields[f])
                 # issue and get should be identical
                 assert i.body == g.body
 

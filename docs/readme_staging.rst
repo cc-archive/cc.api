@@ -234,21 +234,37 @@ Providing work information
   +---------------+------------------------+--------------------+---------------------------------+
   |               | Your name              | dct:title          | attribution_name, creator,      |
   |               |                        |                    | name                            |
-  |               +------------------------+--------------------+---------------------------------+
-  |     zero      | Your URL               | dct:publisher      | attribution_url, actor_href     |
+  |     zero,     +------------------------+--------------------+---------------------------------+
+  | publicdomain  | Your URL               | dct:publisher      | attribution_url, actor_href     |
   |               +------------------------+--------------------+---------------------------------+
   |               | Title of work          | dct:title          | title                           |
   |               +------------------------+--------------------+---------------------------------+
   |               | Territory              | vcard:Country      | territory                       |
   +---------------+------------------------+--------------------+---------------------------------+
+  |               | Work name              | dct:title          | title                           |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Author name            | dct:title of       | author_title, attribution_name, |
+  |               |                        | dct:creator        | name                            |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Author URL             | dct:creator        | author_url, attribution_url     |
+  |     mark      +------------------------+--------------------+---------------------------------+
+  |               | Identifying Individual | dct:title of       | curator_title                   |
+  |               | or Organization name   | dct:publisher      |                                 |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Identifying Individual | dct:publisher      | curator_url                     |
+  |               | or Organization URL    |                    |                                 |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Waive incidental rights| cc:license         | waive_rights                    |
+  +---------------+------------------------+--------------------+---------------------------------+
   
   The "Additional Information" column represents fields that are made available 
-  via the license choosers at http://creativecommons.org/choose/ and 
-  http://creativecommons.org/choose/zero. These fields will have an effect on how 
-  the resulting License RDFa is structured. The work-info elements are listed in 
-  order of searching priority, i.e. in determining a value for RDFa inclusion, 
-  a work-info element will override the elements that follow it in the valid elements 
-  list.
+  via the license choosers at http://creativecommons.org/choose/, 
+  http://creativecommons.org/choose/zero/, and http://creativecommons.org/choose/mark/. 
+  These fields will have an effect on how the resulting License RDFa is structured. 
+  The work-info elements are listed in order of searching priority, i.e. in determining 
+  a value for RDFa inclusion, a work-info element will override the elements that 
+  follow it in the valid elements list.
+  
 
 Additional work-info details
 ----------------------------
