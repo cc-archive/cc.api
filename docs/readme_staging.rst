@@ -253,8 +253,6 @@ Providing work information
   |               +------------------------+--------------------+---------------------------------+
   |               | Identifying Individual | dct:publisher      | curator_url                     |
   |               | or Organization URL    |                    |                                 |
-  |               +------------------------+--------------------+---------------------------------+
-  |               | Waive incidental rights| cc:license         | waive_rights                    |
   +---------------+------------------------+--------------------+---------------------------------+
   
   The "Additional Information" column represents fields that are made available 
