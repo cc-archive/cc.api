@@ -257,9 +257,8 @@ Providing work information
   |               +------------------------+--------------------+---------------------------------+
   |               | More permissions URL   | cc:morePermissions | more_permissions_url            |
   +---------------+------------------------+--------------------+---------------------------------+
-  |               | Your name              | dct:title          | attribution_name, creator,      |
-  |               |                        |                    | name                            |
-  |     zero,     +------------------------+--------------------+---------------------------------+
+  |               | Your name              | dct:title          | attribution_name, creator, name |
+  | zero,         +------------------------+--------------------+---------------------------------+
   | publicdomain  | Your URL               | dct:publisher      | attribution_url, actor_href     |
   |               +------------------------+--------------------+---------------------------------+
   |               | Title of work          | dct:title          | title                           |
@@ -295,11 +294,11 @@ Additional work-info details
   *type*
     The work type should be specified as a valid Dublin Core dc:type; common 
     values are:
-      * Text
-      * StillImage
-      * MovingImage
-      * InteractiveResource
-      * Sound
+    * Text
+    * StillImage
+    * MovingImage
+    * InteractiveResource
+    * Sound
     This may also be left blank, in which case no assertion about the work type
     will be included.
 
@@ -517,3 +516,4 @@ Additional Resources
 
 .. _`Creative Commons Developer Wiki`: http://wiki.creativecommons.org/wiki/Developer
 .. _`CC Web Services in the Wiki`: http://wiki.creativecommons.org/Creative_Commons_Web_Services
+.. _`WSGI`: http://www.python.org/peps/pep-0333.html
