@@ -2,9 +2,9 @@
 Development Version Documentation
 ---------------------------------
 
- :Author: Nathan R. Yergler
+ :Author: Nathan R. Yergler, John E. Doig III
  :Version: Development
- :Updated: $Date: 2009-07-20 15:19:13 -0700 (Mon, 20 Jul 2009) $
+ :Updated: Date: 2011-01-11 13:45:00 -0700 (Tue, 11 Jan 2010)
 
 .. contents:: Document Index
    :backlinks: None
@@ -19,7 +19,9 @@ curent version can be found at http://api.creativecommons.org.
 
 Changes Since 1.5
 =================
-
+  * Added the ``zero`` license class and aliased the ``publicdomain`` class to issue a CC0 result.
+  * Added the ``mark`` license class (Public Domain Mark).
+  * Refinement of Work Information parameters
   * /rest/dev/details
       Added validation for the specified license URI; returns error 
       block if invalid
@@ -38,9 +40,9 @@ Access Method
 
 The Creative Commons Web Services are accessible via a REST interface.  
 The interface is rooted at http://api.creativecommons.org/rest/dev.
-  
+
 Valid Calls
-===========
+^^^^^^^^^^^
 
 /locales
 ~~~~~~~~
@@ -74,11 +76,15 @@ Valid Calls
        <license id="standard">Creative Commons</license>
        <license id="publicdomain">Public Domain</license>
        <license id="recombo">Sampling</license>
+       <license id="zero">CC0</license>
+       <license id="mark">Public Domain Mark</license> 
      </licenses>
 
   If a value for locale is supplied, the service will attempt to return
   localized class descriptions.  If not specified, English will
   be returned.
+
+  .. note:: With the release of the `Public Domain Mark`, the `Public Domain Dedication and Certification` license has been retired. As a result, the `publicdomain` license class has been aliased to the `zero` license class so that the deprecated `Public Domain Dedication and Certification` license is never issued and the `CC0 Public Domain Dedication` license is issued instead. You can read more about Creative Commons' retired licenses here http://creativecommons.org/retiredlicenses.
 
 /license/<class>[?locale=xx]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,15 +120,12 @@ Valid Calls
      <type>enum</type>
      <enum id="y">
        <label xml:lang="en">Yes</label>
-       <description xml:lang="en">...</description>
      </enum>
      <enum id="sa">
        <label xml:lang="en">ShareAlike</label>
-       <description xml:lang="en">...</description>
      </enum>
      <enum id="n">
        <label xml:lang="en">No</label>
-       <description xml:lang="en">...</description>
      </enum>
     </field>
     <field id="jurisdiction">
@@ -139,12 +142,9 @@ Valid Calls
    </licenseclass>
 
 
-  Note that a given field or enum element may have more than one
-  label, so long as they have unique xml:lang attributes.  Future
-  language translations may be added at any time in the future without
-  breaking 1.0 compatibility.
-
-  
+  Note that a given field or enum element may have more than one label, so long as they
+  have unique xml:lang attributes.  Future language translations may be added at any time
+  in the future without breaking 1.0 compatibility.
 
 /license/<class>/issue
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -165,7 +165,7 @@ Valid Calls
     </answers>
 
   This example would issue a by-nc license in the generic (default) 
-  jurisdiction.  
+  jurisdiction. 
 
 
 <answers> XML syntax
@@ -188,14 +188,14 @@ Valid Calls
       * The exception to this rule is the ``<jurisdiction>`` tag.  If an unknown
         jurisdiction is specified, the web services will silently fall back to
         the generic jurisdiction.
+
   
 Providing work information
 --------------------------
 
   The information passed to the licensing web service may be augmented with
   optional information about the work to be licensed.  If included this 
-  information will be included in the returned RDF and RDFa.  For
-  example::
+  information will be used in the returned RDF and RDFa.  For example::
 
     <answers>
       <locale>en</locale>
@@ -205,48 +205,100 @@ Providing work information
         <jurisdiction></jurisdiction>
       </license-standard>
       <work-info>
+        <work-url>http://example.com/work</work-url>
         <title>The Title</title>
-	<work-url>http://example.com/work</work-url>
-	<source-url>http://example.com/source</source-url>
-	<type>Text</type>
-	<year>2006</year>
-	<description>A brief description...</description>
-	<creator>John Q. Public</creator>
-	<holder>John Q. Public</holder>
+        <source-url>http://example.com/source</source-url>
+        <type>Text</type>
+        <year>2006</year>
+        <description>A brief description...</description>
+        <creator>John Q. Public</creator>
+        <holder>John Q. Public</holder>
+        <actor_href>http://example.com/actor</actor_href>
+        <territory>US</territory>
+        <attribution_url>http://example.com/attribution</attribution_url>
+        <attribution_name>Example</attribution_name>
+        <more_permissions_url>http://example.com/more_permissions</more_permissions_url>
       </work-info>
     </answers>
+  
+  
 
   The work-info element and all sub-elements are optional.
 
-  The work type should be specified as a valid Dublin Core dc:type; common 
-  values are:
+  Only certain sub-elements will affect the Licenses' RDFa formatting, 
+  the table below details how the elements are used in the RDFa formatting. 
 
-    * Text
-    * StillImage
-    * MovingImage
-    * InteractiveResource
-    * Sound
+  +---------------+------------------------+--------------------+---------------------------------+
+  | License class | Additional Information |   RDFa property    |   Valid work-info elements      | 
+  +===============+========================+====================+=================================+
+  |               | Attribute work to name | cc:attributionName | attribution_name, creator,      |
+  |               |                        |                    | holder                          |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Attribute work to URL  | cc:attributionURL  | attribution_url, work-url       |
+  |               +------------------------+--------------------+---------------------------------+
+  |   standard    | Title of work          | dc:title           | title                           | 
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Source work URL        | dc:source          | source-url                      |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Format of the work     | dc:type            | type                            |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | More permissions URL   | cc:morePermissions | more_permissions_url            |
+  +---------------+------------------------+--------------------+---------------------------------+
+  |               | Your name              | dct:title          | attribution_name, creator,      |
+  |               |                        |                    | name                            |
+  |     zero,     +------------------------+--------------------+---------------------------------+
+  | publicdomain  | Your URL               | dct:publisher      | attribution_url, actor_href     |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Title of work          | dct:title          | title                           |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Territory              | vcard:Country      | territory                       |
+  +---------------+------------------------+--------------------+---------------------------------+
+  |               | Work name              | dct:title          | title                           |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Author name            | dct:title of       | author_title, attribution_name, |
+  |               |                        | dct:creator        | name                            |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Author URL             | dct:creator        | author_url, attribution_url     |
+  |     mark      +------------------------+--------------------+---------------------------------+
+  |               | Identifying Individual | dct:title of       | curator_title                   |
+  |               | or Organization name   | dct:publisher      |                                 |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Identifying Individual | dct:publisher      | curator_url                     |
+  |               | or Organization URL    |                    |                                 |
+  +---------------+------------------------+--------------------+---------------------------------+
+  
+  The "Additional Information" column represents fields that are made available 
+  via the license choosers at http://creativecommons.org/choose/, 
+  http://creativecommons.org/choose/zero/, and http://creativecommons.org/choose/mark/. 
+  These fields will have an effect on how the resulting License RDFa is structured. 
+  The work-info elements are listed in order of searching priority, i.e. in determining 
+  a value for RDFa inclusion, a work-info element will override the elements that 
+  follow it in the valid elements list.
+  
 
-  This may also be left blank, in which case no assertion about the work type
-  will be included.
+Additional work-info details
+----------------------------
+  
+  *type*
+    The work type should be specified as a valid Dublin Core dc:type; common 
+    values are:
+      * Text
+      * StillImage
+      * MovingImage
+      * InteractiveResource
+      * Sound
+    This may also be left blank, in which case no assertion about the work type
+    will be included.
 
-Extended Metadata
------------------
-
-  Attribution and more permissions metadata may be added to the
-  work metadata through work-info elements.  Supported elements are:
-
-    * *attribution_name* The name which the work should be attributed to.
-    * *attribution_url* The URL to use for attribution.
-    * *more_permissions_url* The URL where more permissions (commercial, etc)
-      may be obtained.
+  *territory*
+    Must be a valid, uppercased ISO 3166-1-alpha-2 country code. A list of available codes 
+    can be found `here <http://www.iso.org/iso/english_country_names_and_code_elements>`_.
 
 License return format
 ---------------------
-
-  The issue method uses the chooselicense.xsl document to generate the
-  resulting XML document.  The result of this sample call would be an
-  XML document, such as::
+  
+  The issue method forms an XML document based on the parameters provided by the 
+  answers xml. The result of this sample call would be an XML document, such as::
 
     <?xml version="1.0" encoding="utf-8"?>
     <result>
@@ -284,6 +336,7 @@ License return format
   Note the ``<html>`` element contains the HTML as generated by the
   `CC License Chooser <http://creativecommons.org/license/>`_,
   including machine readable RDFa.
+
 
 /license/<class>/get?
 ~~~~~~~~~~~~~~~~~~~~~
@@ -343,6 +396,11 @@ License return format
                            NonCommercial licenses.
   locale         0 or 1    Locale to use for license names; defaults to
                            English (en).  Example: ja
+  language       0 or 1    **DEPRECATED** *This parameter is deprecated
+                           in favor of locale for consistency.*
+
+                           Language to use for license names; defaults to
+                           English (en).  Example: ja
   select         0 or 1    If specified, the value used for the name 
                            attribute of the <select> element; if not 
                            specified, the select element is omitted.
@@ -355,7 +413,7 @@ License return format
   In addition to these parameters, the Simple Chooser can be further 
   customized by invoking as either /simple/chooser or /simple/chooser.js.
   If invoked as the former, the result is raw HTML.  If invoked as the
-  latter, the result is wrapped in document.write() calls.
+  latter, the result is wrapped in ``document.write()`` calls.
 
 /support/jurisdictions
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -369,6 +427,11 @@ License return format
   ============== ========= ==============================================
   locale         0 or 1    Locale to use for license names; defaults to
                            English (en).  Example: ja
+  language       0 or 1    **DEPRECATED** *This parameter is deprecated 
+                           in favor of locale for consistency.*
+
+                           Language to use for license names; defaults to
+                           English (en).  Example: ja
   select         0 or 1    If specified, the value used for the name 
                            attribute of the <select> element; if not 
                            specified, the select element is omitted.
@@ -378,9 +441,9 @@ License return format
   customized by invoking as either /support/jurisdictions or 
   /support/jurisdictions.js.
   If invoked as the former, the result is raw HTML.  If invoked as the
-  latter, the result is wrapped in document.write() calls.
+  latter, the result is wrapped in ``document.write()`` calls.
 
- 
+
 Error Handling
 ==============
 
@@ -415,7 +478,7 @@ Error Handling
 
 
 Currently Defined Errors
-~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^
 
  ============== ==================================================
    id            description
@@ -439,5 +502,5 @@ Additional Resources
  * `Creative Commons Developer Wiki`_ 
  * `CC Web Services in the Wiki`_
 
-.. _`Creative Commons Developer Wiki`: http://wiki.creativecommons.org/Developer
+.. _`Creative Commons Developer Wiki`: http://wiki.creativecommons.org/wiki/Developer
 .. _`CC Web Services in the Wiki`: http://wiki.creativecommons.org/Creative_Commons_Web_Services

@@ -16,12 +16,15 @@ The following versions are available:
    1.0 <readme_10>
    1.5 <readme_15>
    Development <readme_dev>
-   Staging <readme_staging>
 
 The current in-development API is described in the 
 :doc:`development version documentation <readme_dev>`.  These APIs are currently in beta, and we are soliciting 
 feedback and suggestions. As such, the API may change in the future.
 
+The CC REST API source code can be browsed at http://code.creativecommons.org/viewgit/cc.api.git/.
+To download the source code, you can clone its Git repository by running `git clone http://code.creativecommons.org/cc.api.git`.
+
+.. Attention:: If you are using the `staging` version of the API, we ask that your code be updated to use the `dev` version instead. Requests made to the `staging` API URLs are still supported at the moment, but will be turned off in favor of the `dev` version in the near future.
 
 Sample Code
 ~~~~~~~~~~~

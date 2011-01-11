@@ -2,9 +2,9 @@
 Version 1.5 Documentation
 -------------------------
 
- :Author: Nathan R. Yergler
+ :Author: Nathan R. Yergler, John E. Doig III 
  :Version: 1.5
- :Updated: $Date: 2009-07-20 15:19:13 -0700 (Mon, 20 Jul 2009) $
+ :Updated: Date: 2011-01-11 13:45:00 -0700 (Tue, 11 Jan 2010)
 
 .. contents:: Document Index
    :backlinks: None
@@ -18,7 +18,18 @@ a backwards compatible way.
 
 Changes Since 1.0
 =================
-
+  * Added the ``zero`` license class and aliased the ``publicdomain`` class to issue a CC0 result.
+  * Added the ``mark`` license class (Public Domain Mark).
+  * Refinement of Work Information parameters
+  * /simple/chooser
+      The ``language`` parameter is no longer supported; use ``locale`` 
+      instead.
+  * /support/jurisdictions
+      The ``language`` parameter is no longer supported; use ``locale`` 
+      instead.
+  * /license/[class]/
+      License questions for a class may now include <description>s for
+      enumeration items.
   * /rest/1.5/simple/chooser
       Simple license chooser API added.
   * /rest/1.5/licenses/[class] 
@@ -80,6 +91,8 @@ Valid Calls
        <license id="standard">Creative Commons</license>
        <license id="publicdomain">Public Domain</license>
        <license id="recombo">Sampling</license>
+       <license id="zero">CC0</license>
+       <license id="mark">Public Domain Mark</license> 
      </licenses>
 
   If a value for locale is supplied, the service will attempt to return
@@ -99,7 +112,7 @@ Valid Calls
   be returned.
 
   A partial example of the returned document for 
-  http://api.creativecommons.org/rest/dev/license/standard ::
+  http://api.creativecommons.org/rest/1.5/license/standard ::
 
     <licenseclass id="standard">
      <label xml:lang="en">Creative Commons</label>
@@ -150,11 +163,9 @@ Valid Calls
 ~~~~~~~~~~~~~~~~~~~~~~
 
   Called with an HTTP POST whose contents are a single form variable, 
-  ``answers``. 
-  The value of answers is an XML string containing values which match 
-  each ``field``
-  element found in the earlier license/[class] call.  A sample answers 
-  string for the 
+  ``answers``.  The value of answers is an XML string containing values 
+  which match each ``field`` element found in the earlier  
+  `/license/<class>[?locale=xx]`_ call.  A sample answers string for the 
   previous example is::
 
     <answers>
@@ -191,13 +202,116 @@ Valid Calls
         jurisdiction is specified, the web services will silently fall back to
         the generic jurisdiction.
 
+  
+Providing work information
+--------------------------
+
+  The information passed to the licensing web service may be augmented with
+  optional information about the work to be licensed.  If included this 
+  information will be used in the returned RDF and RDFa.  For example::
+
+    <answers>
+      <locale>en</locale>
+      <license-standard>
+        <commercial>n</commercial>
+        <derivatives>y</derivatives>
+        <jurisdiction></jurisdiction>
+      </license-standard>
+      <work-info>
+        <work-url>http://example.com/work</work-url>
+        <title>The Title</title>
+        <source-url>http://example.com/source</source-url>
+        <type>Text</type>
+        <year>2006</year>
+        <description>A brief description...</description>
+        <creator>John Q. Public</creator>
+        <holder>John Q. Public</holder>
+        <actor_href>http://example.com/actor</actor_href>
+        <territory>US</territory>
+        <attribution_url>http://example.com/attribution</attribution_url>
+        <attribution_name>Example</attribution_name>
+        <more_permissions_url>http://example.com/more_permissions</more_permissions_url>
+      </work-info>
+    </answers>
+  
+  
+
+  The work-info element and all sub-elements are optional.
+
+  Only certain sub-elements will affect the Licenses' RDFa formatting, 
+  the table below details how the elements are used in the RDFa formatting. 
+
+  +---------------+------------------------+--------------------+---------------------------------+
+  | License class | Additional Information |   RDFa property    |   Valid work-info elements      | 
+  +===============+========================+====================+=================================+
+  |               | Attribute work to name | cc:attributionName | attribution_name, creator,      |
+  |               |                        |                    | holder                          |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Attribute work to URL  | cc:attributionURL  | attribution_url, work-url       |
+  |               +------------------------+--------------------+---------------------------------+
+  |   standard    | Title of work          | dc:title           | title                           | 
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Source work URL        | dc:source          | source-url                      |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Format of the work     | dc:type            | type                            |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | More permissions URL   | cc:morePermissions | more_permissions_url            |
+  +---------------+------------------------+--------------------+---------------------------------+
+  |               | Your name              | dct:title          | attribution_name, creator,      |
+  |               |                        |                    | name                            |
+  |     zero,     +------------------------+--------------------+---------------------------------+
+  | publicdomain  | Your URL               | dct:publisher      | attribution_url, actor_href     |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Title of work          | dct:title          | title                           |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Territory              | vcard:Country      | territory                       |
+  +---------------+------------------------+--------------------+---------------------------------+
+  |               | Work name              | dct:title          | title                           |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Author name            | dct:title of       | author_title, attribution_name, |
+  |               |                        | dct:creator        | name                            |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Author URL             | dct:creator        | author_url, attribution_url     |
+  |     mark      +------------------------+--------------------+---------------------------------+
+  |               | Identifying Individual | dct:title of       | curator_title                   |
+  |               | or Organization name   | dct:publisher      |                                 |
+  |               +------------------------+--------------------+---------------------------------+
+  |               | Identifying Individual | dct:publisher      | curator_url                     |
+  |               | or Organization URL    |                    |                                 |
+  +---------------+------------------------+--------------------+---------------------------------+
+  
+  The "Additional Information" column represents fields that are made available 
+  via the license choosers at http://creativecommons.org/choose/, 
+  http://creativecommons.org/choose/zero/, and http://creativecommons.org/choose/mark/. 
+  These fields will have an effect on how the resulting License RDFa is structured. 
+  The work-info elements are listed in order of searching priority, i.e. in determining 
+  a value for RDFa inclusion, a work-info element will override the elements that 
+  follow it in the valid elements list.
+  
+
+Additional work-info details
+----------------------------
+  
+  *type*
+    The work type should be specified as a valid Dublin Core dc:type; common 
+    values are:
+      * Text
+      * StillImage
+      * MovingImage
+      * InteractiveResource
+      * Sound
+    This may also be left blank, in which case no assertion about the work type
+    will be included.
+
+  *territory*
+    Must be a valid, uppercased ISO 3166-1-alpha-2 country code. A list of available codes 
+    can be found `here <http://www.iso.org/iso/english_country_names_and_code_elements>`_.
 
 License return format
 ---------------------
-
-  The issue method uses the chooselicense.xsl document to generate the
-  resulting XML document.  The result of this sample call would be an
-  XML document, such as::
+  
+  The issue method forms an XML document based on the parameters provided by the 
+  answers xml. The result of this sample call would be an XML document, such as::
 
     <?xml version="1.0" encoding="utf-8"?>
     <result>
@@ -401,6 +515,5 @@ Additional Resources
  * `Creative Commons Developer Wiki`_ 
  * `CC Web Services in the Wiki`_
 
-.. _WSGI: http://www.python.org/peps/pep-0333.html
 .. _`Creative Commons Developer Wiki`: http://wiki.creativecommons.org/wiki/Developer
 .. _`CC Web Services in the Wiki`: http://wiki.creativecommons.org/Creative_Commons_Web_Services
