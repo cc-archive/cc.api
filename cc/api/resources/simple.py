@@ -27,7 +27,7 @@ from cc.api.handlers import render_as, content_type
 
 def chooser_dropdown(jurisdiction, exclude, locale, select=None):
     
-    codes = ['by', 'by-sa', 'by-nc', 'by-nd', 'by-nc-nd', 'publicdomain']
+    codes = ['by', 'by-sa', 'by-nc', 'by-nd', 'by-nc-nd', 'by-nc-sa', 'mark', 'CC0']
 
     options = []
     for code in codes:
@@ -37,13 +37,7 @@ def chooser_dropdown(jurisdiction, exclude, locale, select=None):
         option = ET.Element('option', dict(value=l.uri))
         option.text = l.title(locale)
         options.append(option)
-
-    # CC0 must ignore the jurisdiction
-    cc0 = cc.license.by_code('CC0')
-    option = ET.Element('option', dict(value=cc0.uri))
-    option.text = cc0.title(locale)
-    options.append(option)
-
+    
     if select:
         select_tag = ET.Element('select', dict(name=select))
         select_tag.extend(options)
