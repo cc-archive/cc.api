@@ -31,7 +31,10 @@ def chooser_dropdown(jurisdiction, exclude, locale, select=None):
 
     options = []
     for code in codes:
-        l = cc.license.by_code(code, jurisdiction) # fails on CC0 :/
+        if code not in ('mark', 'CC0'):
+            l = cc.license.by_code(code, jurisdiction)
+        else:
+            l = cc.license.by_code(code)
         if filter(lambda e: e in l.uri, exclude):
             continue # license url contains a string found in exclude list
         option = ET.Element('option', dict(value=l.uri))
