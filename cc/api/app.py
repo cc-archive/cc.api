@@ -28,7 +28,7 @@ urls = ( # tuple of url to resource method mappings
     '/locales', 'cc.api.resources.locales.index',
     '/details', 'cc.api.resources.details.index',
     
-    '/license/([\w\d]+)',       'cc.api.resources.license.index',
+    '/license/([\w\d]+)/?',     'cc.api.resources.license.index',
     '/license/([\w\d]+)/issue', 'cc.api.resources.license.issue',
     '/license/([\w\d]+)/get',   'cc.api.resources.license.issue_get',
     
