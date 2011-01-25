@@ -73,6 +73,7 @@ class index:
         return root
 
 class issue:
+    
     @render_as('xml')
     def POST(self, selector):
 
@@ -169,6 +170,9 @@ class issue_get:
                                               work_dict, locale)
         except:
             return api_exceptions.pythonerr()
+
+    def POST(self, selector):
+        return self.GET(selector)
 
 class jurisdiction:
 

@@ -349,6 +349,12 @@ class TestLicenseGet(TestApi):
         """/get issues recombo licenses successfully."""
         self._get('zero')
 
+    def test_license_post_to_get(self):
+        """/get needs to accept POST requests as well"""
+        res_get = self.app.get('/license/standard/get?commerical=n&derivatives=sa')
+        res_post= self.app.post('/license/standard/get?commerical=n&derivatives=sa')
+        assert res_get.body == res_post.body
+
 class TestLicenseJurisdiction(TestApi):
 
     def test_invalid_jurisdiction(self):
