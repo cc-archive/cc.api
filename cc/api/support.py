@@ -54,7 +54,7 @@ FORMATTER_KEYS = {
         ('holder', 'attribution_name'),
         ('attribution_url', 'attribution_url'),
         ('work-url', 'attribution_url'), 
-        ('title', 'work_title'),
+        ('title', 'worktitle'),
         ('source-url', 'source_work'),
         ('type', 'format'),
         ('more_permissions_url', 'more_permissions_url'),
