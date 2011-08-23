@@ -137,11 +137,12 @@ def render_as(*types):
             # throw an exception. if the resource resulted in anything
             # other than an xml tree then this decorator should not be
             # used for that resource's method.
-            try:
-                result = fn(*args, **kwargs)
-            except Exception, e:
-                if web.config.debug: raise e
-                return web.internalerror()
+            #try:
+            #    result = fn(*args, **kwargs)
+            #except Exception, e:
+            #    if web.config.debug: raise e
+            #    return web.internalerror()
+            result = fn(*args, **kwargs)
             
             return handler().response(result)
             
