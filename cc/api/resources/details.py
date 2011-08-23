@@ -37,11 +37,11 @@ class index:
         if not license_uri:
             return api_exceptions.missingparam('license-uri')
 
-        l = cc.license.by_uri(str(license_uri))
-        if not l:
+        license = cc.license.by_uri(str(license_uri))    
+        if not license:
             return api_exceptions.invaliduri()
         
-        return support.build_results_tree(l, locale=locale)
+        return support.build_results_tree(license, locale=locale)
 
     def POST(self):
         return self.GET(web.input().get('locale'),

@@ -32,11 +32,12 @@ class index:
     @render_as('xml')
     def GET(self, selector):
 
-        try:
-            assert selector != 'software'
-            if selector == 'publicdomain': selector = 'zero'
+        lclass = None
+        if selector != 'software':
+            if selector == 'publicdomain': 
+                selector = 'zero'
             lclass = cc.license.selectors.choose(selector)
-        except:
+        if not lclass:
             return api_exceptions.invalidclass()
 
         locale = web.input().get('locale', 'en')
@@ -76,14 +77,13 @@ class issue:
     
     @render_as('xml')
     def POST(self, selector):
-
-        try:
-            assert selector != 'software'
+        
+        lclass = None
+        if selector != 'software':
             if selector == 'publicdomain':
-                lclass = cc.license.selectors.choose('zero')
-            else:
-                lclass = cc.license.selectors.choose(selector)
-        except:
+                selector = 'zero'
+            lclass = cc.license.selectors.choose(selector)
+        if not lclass:
             return api_exceptions.invalidclass()
 
         if not web.input().get('answers'):
@@ -144,11 +144,12 @@ class issue_get:
         if locale not in cc.license.locales():
             locale = 'en'
         
-        try:
-            assert selector != 'software'
-            if selector == 'publicdomain': selector = 'zero'
+        lclass = None
+        if selector != 'software':
+            if selector == 'publicdomain':
+                selector = 'zero'
             lclass = cc.license.selectors.choose(selector)
-        except:
+        if not lclass:
             return api_exceptions.invalidclass()
 
         answers = support.build_answers_xml(lclass, args)
@@ -184,10 +185,9 @@ class jurisdiction:
         # return non-newest versions?
         current_only = web.input().get('current', '1')
         current_only = bool(int(current_only))
-        
+
         j = cc.license.jurisdictions.by_code(str(jid))
-        
-        if not j and not j.launched:
+        if not j or not j.launched:
             return api_exceptions.invalidjurisdiction()
 
         juri = ET.Element('jurisdiction', dict(name=j.title(str(locale)),
