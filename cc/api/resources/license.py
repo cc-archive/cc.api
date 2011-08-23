@@ -185,12 +185,9 @@ class jurisdiction:
         current_only = web.input().get('current', '1')
         current_only = bool(int(current_only))
         
-        try:
-            j = cc.license.jurisdictions.by_code(str(jid))
-            
-            if not j.launched:
-                raise cc.license.CCLicenseError
-        except cc.license.CCLicenseError:
+        j = cc.license.jurisdictions.by_code(str(jid))
+        
+        if not j and not j.launched:
             return api_exceptions.invalidjurisdiction()
 
         juri = ET.Element('jurisdiction', dict(name=j.title(str(locale)),

@@ -37,9 +37,8 @@ class index:
         if not license_uri:
             return api_exceptions.missingparam('license-uri')
 
-        try:
-            l = cc.license.by_uri(str(license_uri))
-        except cc.license.CCLicenseError:
+        l = cc.license.by_uri(str(license_uri))
+        if not l:
             return api_exceptions.invaliduri()
         
         return support.build_results_tree(l, locale=locale)
