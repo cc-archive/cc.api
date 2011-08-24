@@ -86,12 +86,12 @@ class issue:
         if not lclass:
             return api_exceptions.invalidclass()
 
-        if not web.input().get('answers'):
+        answers_xml = web.input().get('answers')
+        if not answers_xml:
             return api_exceptions.missingparam('answers')
 
         try:
-            answers_xml = web.input().get('answers')
-            if selector == 'publicdomain':
+            if selector == 'zero':
                 answers_xml = answers_xml.replace(
                     '<license-publicdomain>',
                     '<license-zero>').replace(
