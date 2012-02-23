@@ -22,6 +22,7 @@ from setuptools import setup, find_packages
 import sys
 
 requires = [
+    'python-gettext<2.0',
     'setuptools',
     'mimeparse',
     'decorator',
