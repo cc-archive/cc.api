@@ -290,17 +290,6 @@ class TestLicenseWorkInfo(TestApi):
                 # issue and get should be identical
                 assert i.body == g.body
 
-    def test_invalid_work_jurisdiction(self):
-        """ cc.license will KeyError when an invalid work_jurisidction is passed to
-        the CC0 formatter. """
-        res = self.app.get('/license/zero/get?territory=PUKE')
-        assert relax_validate(RELAX_ERROR, res.body)
-        res = self.app.post('/license/zero/issue',
-                            params={'answers': self._cc0_answers % (
-                                    '<work-info><territory>' + \
-                                    'PUKE</territory></work-info>')})
-        assert relax_validate(RELAX_ERROR, res.body)
-
 class TestLicenseGet(TestApi):
     
     def test_invalid_class(self):
