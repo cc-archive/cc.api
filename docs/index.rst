@@ -3,7 +3,7 @@ api.creativecommons.org
 =======================
 
 :Author: Nathan R. Yergler, John E. Doig III
-:Updated: $Date: 2009-04-02 10:57:29 -0700 (Thu, 02 Apr 2009) $
+:Updated: 2009-04-02 10:57:29 -0700
 
 Creative Commons provides web service APIs which can be used to integrate 
 the Creative Commons licensing engine into third party applications. 

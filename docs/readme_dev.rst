@@ -236,7 +236,7 @@ Providing work information
   |               +------------------------+--------------------+---------------------------------+
   |               | Attribute work to URL  | cc:attributionURL  | attribution_url, work-url       |
   |               +------------------------+--------------------+---------------------------------+
-  |   standard    | Title of work          | dc:title           | title                           | 
+  | standard      | Title of work          | dc:title           | title                           | 
   |               +------------------------+--------------------+---------------------------------+
   |               | Source work URL        | dc:source          | source-url                      |
   |               +------------------------+--------------------+---------------------------------+
@@ -246,7 +246,7 @@ Providing work information
   +---------------+------------------------+--------------------+---------------------------------+
   |               | Your name              | dct:title          | attribution_name, creator,      |
   |               |                        |                    | name                            |
-  |     zero,     +------------------------+--------------------+---------------------------------+
+  | zero,         +------------------------+--------------------+---------------------------------+
   | publicdomain  | Your URL               | dct:publisher      | attribution_url, actor_href     |
   |               +------------------------+--------------------+---------------------------------+
   |               | Title of work          | dct:title          | title                           |
@@ -259,7 +259,7 @@ Providing work information
   |               |                        | dct:creator        | name                            |
   |               +------------------------+--------------------+---------------------------------+
   |               | Author URL             | dct:creator        | author_url, attribution_url     |
-  |     mark      +------------------------+--------------------+---------------------------------+
+  | mark          +------------------------+--------------------+---------------------------------+
   |               | Identifying Individual | dct:title of       | curator_title                   |
   |               | or Organization name   | dct:publisher      |                                 |
   |               +------------------------+--------------------+---------------------------------+
@@ -282,11 +282,13 @@ Additional work-info details
   *type*
     The work type should be specified as a valid Dublin Core dc:type; common 
     values are:
+    
       * Text
       * StillImage
       * MovingImage
       * InteractiveResource
       * Sound
+    
     This may also be left blank, in which case no assertion about the work type
     will be included.
 
