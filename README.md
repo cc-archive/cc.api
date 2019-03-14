@@ -25,3 +25,10 @@ To build/install with the current source:
     wget https://bootstrap.pypa.io/bootstrap-buildout.py
     python bootstrap-buildout.py
     bin/buildout
+
+
+## License
+
+- [`LICENSE`](LICENSE) (Expat/[MIT][mit] License)
+
+[mit]: http://www.opensource.org/licenses/MIT "The MIT License | Open Source Initiative"
