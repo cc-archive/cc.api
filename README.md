@@ -1,9 +1,27 @@
-# CC API
+# cc.api
+
+https://api.creativecommons.org/docs/
 
 
+## Installation
 
-## Support
+To build/install with the current source:
 
-Problems? Write to us at hackers@creativecommons.org or send us a pull request...
+    apt-get remove python-setuptools
+    wget https://bootstrap.pypa.io/get-pip.py
+    python get-pip.py
 
-Updated: April 2014.
+    #apt-get install apache2
+    #cd /var/www
+    #mkdir api.creativecommons.org
+
+    git clone https://github.com/creativecommons/i18n.git
+    cd i18n
+    python bootstrap.py
+    bin/buildout
+    python setup.py install
+
+    apt-get install libxslt-dev python-dev libz-dev
+    wget https://bootstrap.pypa.io/bootstrap-buildout.py
+    python bootstrap-buildout.py
+    bin/buildout
