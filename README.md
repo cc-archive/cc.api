@@ -13,6 +13,13 @@
 https://api.creativecommons.org/docs/
 
 
+## ccEngine
+
+This repository is part of the ccEngine: [cc-archive/cc.engine][cc-engine].
+
+[cc.engine]: https://github.com/cc-archive/cc.engine
+
+
 ## Installation
 
 To build/install with the current source:
