@@ -17,7 +17,7 @@ https://api.creativecommons.org/docs/
 
 This repository is part of the ccEngine: [cc-archive/cc.engine][cc-engine].
 
-[cc.engine]: https://github.com/cc-archive/cc.engine
+[cc-engine]: https://github.com/cc-archive/cc.engine
 
 
 ## Installation
